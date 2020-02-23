@@ -1,0 +1,515 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>Netty项目-仿写微信 IM 即时通讯系统(3) | 哑舍</title><meta name="description" content="Netty项目-仿写微信 IM 即时通讯系统(3)"><meta name="keywords" content="Netty"><meta name="author" content="Machine"><meta name="copyright" content="Machine"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/cat2.ico"><link rel="preconnect" href="//cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link rel="preconnect" href="//busuanzi.ibruce.info"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Netty项目-仿写微信 IM 即时通讯系统(3)"><meta name="twitter:description" content="Netty项目-仿写微信 IM 即时通讯系统(3)"><meta name="twitter:image" content="https://machine4869.gitee.io/img/default_p11.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="Netty项目-仿写微信 IM 即时通讯系统(3)"><meta property="og:url" content="https://machine4869.gitee.io/2019/08/09/20190809142144254/"><meta property="og:site_name" content="哑舍"><meta property="og:description" content="Netty项目-仿写微信 IM 即时通讯系统(3)"><meta property="og:image" content="https://machine4869.gitee.io/img/default_p11.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>const autoChangeMode = 'false'
+var t = Cookies.get("theme");
+if (autoChangeMode == '1'){
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+const isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+if (t === undefined){
+  if (isLightMode) activateLightMode()
+  else if (isDarkMode) activateDarkMode()
+  else if (isNotSpecified || hasNoSupport){
+    console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+    now = new Date();
+    hour = now.getHours();
+    isNight = hour < 6 || hour >= 18
+    isNight ? activateDarkMode() : activateLightMode()
+}
+} else if (t == 'light') activateLightMode()
+else activateDarkMode()
+
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="canonical" href="https://machine4869.gitee.io/2019/08/09/20190809142144254/"><link rel="prev" title="用netty实现一个简单的rpc" href="https://machine4869.gitee.io/2019/08/13/20190813154158451/"><link rel="next" title="Netty项目-仿写微信 IM 即时通讯系统(2)" href="https://machine4869.gitee.io/2019/07/28/20190728161454796/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://machine4869.gitee.io/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: 'Snackbar.bookmark.title',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"title":"Snackbar.bookmark.title","message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#2d3035","position":"bottom-left"},
+  baiduPush: false,
+  isHome: false,
+  isPost: true
+  
+}</script><meta name="generator" content="Hexo 4.2.0"></head><body><header> <div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">哑舍</a></span><span class="toggle-menu pull_right close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></span><span class="pull_right" id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></span></div></header><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">134</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">27</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">45</div></a></div></div></div><hr><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></div><div id="mobile-sidebar-toc"><div class="toc_mobile_headline">目录</div><div class="sidebar-toc__content"><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#实战：客户端互聊原理与实现"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">实战：客户端互聊原理与实现</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1、最终效果"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">1、最终效果</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2、-一对一单聊原理"><span class="toc_mobile_items-number">1.2.</span> <span class="toc_mobile_items-text">2、 一对一单聊原理</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3、一对一单聊实现"><span class="toc_mobile_items-number">1.3.</span> <span class="toc_mobile_items-text">3、一对一单聊实现</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#实战：群聊的发起与通知"><span class="toc_mobile_items-number">2.</span> <span class="toc_mobile_items-text">实战：群聊的发起与通知</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1、最终效果-1"><span class="toc_mobile_items-number">2.1.</span> <span class="toc_mobile_items-text">1、最终效果</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2、群聊原理"><span class="toc_mobile_items-number">2.2.</span> <span class="toc_mobile_items-text">2、群聊原理</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3、控制台程序重构"><span class="toc_mobile_items-number">2.3.</span> <span class="toc_mobile_items-text">3、控制台程序重构</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#4、创建群聊的实现"><span class="toc_mobile_items-number">2.4.</span> <span class="toc_mobile_items-text">4、创建群聊的实现</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#实战：群聊的成员管理（加入与退出，获取成员列表）"><span class="toc_mobile_items-number">3.</span> <span class="toc_mobile_items-text">实战：群聊的成员管理（加入与退出，获取成员列表）</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1、最终效果-2"><span class="toc_mobile_items-number">3.1.</span> <span class="toc_mobile_items-text">1、最终效果</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2、群的加入"><span class="toc_mobile_items-number">3.2.</span> <span class="toc_mobile_items-text">2、群的加入</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3、群的退出"><span class="toc_mobile_items-number">3.3.</span> <span class="toc_mobile_items-text">3、群的退出</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#4、获取成员列表"><span class="toc_mobile_items-number">3.4.</span> <span class="toc_mobile_items-text">4、获取成员列表</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#5、总结"><span class="toc_mobile_items-number">3.5.</span> <span class="toc_mobile_items-text">5、总结</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#实战：群聊消息的收发及-Netty-性能优化"><span class="toc_mobile_items-number">4.</span> <span class="toc_mobile_items-text">实战：群聊消息的收发及 Netty 性能优化</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1、群聊消息最终效果"><span class="toc_mobile_items-number">4.1.</span> <span class="toc_mobile_items-text">1、群聊消息最终效果</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2、群聊消息的收发的实现"><span class="toc_mobile_items-number">4.2.</span> <span class="toc_mobile_items-text">2、群聊消息的收发的实现</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3、共享-handler"><span class="toc_mobile_items-number">4.3.</span> <span class="toc_mobile_items-text">3、共享 handler</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#4、压缩-handler-合并编解码器"><span class="toc_mobile_items-number">4.4.</span> <span class="toc_mobile_items-text">4、压缩 handler - 合并编解码器</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#5、缩短事件传播路径"><span class="toc_mobile_items-number">4.5.</span> <span class="toc_mobile_items-text">5、缩短事件传播路径</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#6、减少阻塞主线程的操作"><span class="toc_mobile_items-number">4.6.</span> <span class="toc_mobile_items-text">6、减少阻塞主线程的操作</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#7、如何准确统计处理时长"><span class="toc_mobile_items-number">4.7.</span> <span class="toc_mobile_items-text">7、如何准确统计处理时长</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#实战：心跳与空闲检测"><span class="toc_mobile_items-number">5.</span> <span class="toc_mobile_items-text">实战：心跳与空闲检测</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1、网络问题"><span class="toc_mobile_items-number">5.1.</span> <span class="toc_mobile_items-text">1、网络问题</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2、服务端空闲检测"><span class="toc_mobile_items-number">5.2.</span> <span class="toc_mobile_items-text">2、服务端空闲检测</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3、客户端定时发心跳"><span class="toc_mobile_items-number">5.3.</span> <span class="toc_mobile_items-text">3、客户端定时发心跳</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#4、-服务端回复心跳与客户端空闲检测"><span class="toc_mobile_items-number">5.4.</span> <span class="toc_mobile_items-text">4、 服务端回复心跳与客户端空闲检测</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#总结"><span class="toc_mobile_items-number">6.</span> <span class="toc_mobile_items-text">总结</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#1-Netty-是什么？"><span class="toc_mobile_items-number">6.1.</span> <span class="toc_mobile_items-text">1. Netty 是什么？</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#2-服务端和客户端启动"><span class="toc_mobile_items-number">6.2.</span> <span class="toc_mobile_items-text">2. 服务端和客户端启动</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#3-ByteBuf"><span class="toc_mobile_items-number">6.3.</span> <span class="toc_mobile_items-text">3. ByteBuf</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#4-自定义协议拆包与编解码"><span class="toc_mobile_items-number">6.4.</span> <span class="toc_mobile_items-text">4. 自定义协议拆包与编解码</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#5-handler-与-pipeline"><span class="toc_mobile_items-number">6.5.</span> <span class="toc_mobile_items-text">5. handler 与 pipeline</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#6-耗时操作的处理与统计"><span class="toc_mobile_items-number">6.6.</span> <span class="toc_mobile_items-text">6. 耗时操作的处理与统计</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#关于进阶学习-Netty"><span class="toc_mobile_items-number">6.7.</span> <span class="toc_mobile_items-text">关于进阶学习 Netty</span></a></li></ol></li></ol></div></div></div><div id="body-wrap"><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true">     </i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#实战：客户端互聊原理与实现"><span class="toc-number">1.</span> <span class="toc-text">实战：客户端互聊原理与实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、最终效果"><span class="toc-number">1.1.</span> <span class="toc-text">1、最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、-一对一单聊原理"><span class="toc-number">1.2.</span> <span class="toc-text">2、 一对一单聊原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、一对一单聊实现"><span class="toc-number">1.3.</span> <span class="toc-text">3、一对一单聊实现</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实战：群聊的发起与通知"><span class="toc-number">2.</span> <span class="toc-text">实战：群聊的发起与通知</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、最终效果-1"><span class="toc-number">2.1.</span> <span class="toc-text">1、最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、群聊原理"><span class="toc-number">2.2.</span> <span class="toc-text">2、群聊原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、控制台程序重构"><span class="toc-number">2.3.</span> <span class="toc-text">3、控制台程序重构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、创建群聊的实现"><span class="toc-number">2.4.</span> <span class="toc-text">4、创建群聊的实现</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实战：群聊的成员管理（加入与退出，获取成员列表）"><span class="toc-number">3.</span> <span class="toc-text">实战：群聊的成员管理（加入与退出，获取成员列表）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、最终效果-2"><span class="toc-number">3.1.</span> <span class="toc-text">1、最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、群的加入"><span class="toc-number">3.2.</span> <span class="toc-text">2、群的加入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、群的退出"><span class="toc-number">3.3.</span> <span class="toc-text">3、群的退出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、获取成员列表"><span class="toc-number">3.4.</span> <span class="toc-text">4、获取成员列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、总结"><span class="toc-number">3.5.</span> <span class="toc-text">5、总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实战：群聊消息的收发及-Netty-性能优化"><span class="toc-number">4.</span> <span class="toc-text">实战：群聊消息的收发及 Netty 性能优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、群聊消息最终效果"><span class="toc-number">4.1.</span> <span class="toc-text">1、群聊消息最终效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、群聊消息的收发的实现"><span class="toc-number">4.2.</span> <span class="toc-text">2、群聊消息的收发的实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、共享-handler"><span class="toc-number">4.3.</span> <span class="toc-text">3、共享 handler</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、压缩-handler-合并编解码器"><span class="toc-number">4.4.</span> <span class="toc-text">4、压缩 handler - 合并编解码器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、缩短事件传播路径"><span class="toc-number">4.5.</span> <span class="toc-text">5、缩短事件传播路径</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6、减少阻塞主线程的操作"><span class="toc-number">4.6.</span> <span class="toc-text">6、减少阻塞主线程的操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7、如何准确统计处理时长"><span class="toc-number">4.7.</span> <span class="toc-text">7、如何准确统计处理时长</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实战：心跳与空闲检测"><span class="toc-number">5.</span> <span class="toc-text">实战：心跳与空闲检测</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、网络问题"><span class="toc-number">5.1.</span> <span class="toc-text">1、网络问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、服务端空闲检测"><span class="toc-number">5.2.</span> <span class="toc-text">2、服务端空闲检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、客户端定时发心跳"><span class="toc-number">5.3.</span> <span class="toc-text">3、客户端定时发心跳</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、-服务端回复心跳与客户端空闲检测"><span class="toc-number">5.4.</span> <span class="toc-text">4、 服务端回复心跳与客户端空闲检测</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#总结"><span class="toc-number">6.</span> <span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Netty-是什么？"><span class="toc-number">6.1.</span> <span class="toc-text">1. Netty 是什么？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-服务端和客户端启动"><span class="toc-number">6.2.</span> <span class="toc-text">2. 服务端和客户端启动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-ByteBuf"><span class="toc-number">6.3.</span> <span class="toc-text">3. ByteBuf</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-自定义协议拆包与编解码"><span class="toc-number">6.4.</span> <span class="toc-text">4. 自定义协议拆包与编解码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-handler-与-pipeline"><span class="toc-number">6.5.</span> <span class="toc-text">5. handler 与 pipeline</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-耗时操作的处理与统计"><span class="toc-number">6.6.</span> <span class="toc-text">6. 耗时操作的处理与统计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于进阶学习-Netty"><span class="toc-number">6.7.</span> <span class="toc-text">关于进阶学习 Netty</span></a></li></ol></li></ol></div></div></div><main id="content-outer"><div id="top-container" style="background-image: url(/img/default_p11.jpeg)"><div id="post-info"><div id="post-title"><div class="posttitle">Netty项目-仿写微信 IM 即时通讯系统(3)</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 发表于 2019-08-09<span class="post-meta__separator">|</span><i class="fa fa-history fa-fw" aria-hidden="true"></i> 更新于 2019-11-28</time><span class="post-meta__separator">|</span><span><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83%E5%BC%8F/">大数据分布式</a><i class="fa fa-angle-right fa-fw" aria-hidden="true"></i><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83%E5%BC%8F/socket%E7%BC%96%E7%A8%8B/">socket编程</a></span><div class="post-meta-wordcount"><i class="fa fa-file-word-o post-meta__icon fa-fw" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">6.8k</span><span class="post-meta__separator">|</span><i class="fa fa-clock-o post-meta__icon fa-fw" aria-hidden="true"></i><span>阅读时长: 21 分钟</span><div class="post-meta-pv-cv"><span class="post-meta__separator">|</span><span><i class="fa fa-eye post-meta__icon fa-fw" aria-hidden="true"> </i>阅读量:</span><span id="busuanzi_value_page_pv"></span><span class="post-meta__separator">|</span><i class="fa fa-comments-o post-meta__icon fa-fw" aria-hidden="true"></i><span>评论数:</span><a href="/2019/08/09/20190809142144254/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2019/08/09/20190809142144254/" itemprop="commentCount"></span></a></div></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><p>目录</p>
+<p>[TOC]</p>
+<h1 id="实战：客户端互聊原理与实现"><a href="#实战：客户端互聊原理与实现" class="headerlink" title="实战：客户端互聊原理与实现"></a>实战：客户端互聊原理与实现</h1><h2 id="1、最终效果"><a href="#1、最终效果" class="headerlink" title="1、最终效果"></a>1、最终效果</h2><blockquote>
+<ol>
+<li>客户端启动之后，我们在控制台输入用户名，服务端随机分配一个 userId 给客户端，这里我们省去了通过账号密码注册的过程，userId 就在服务端随机生成了，生产环境中可能会持久化在数据库，然后每次通过账号密码去“捞”。</li>
+<li>当有两个客户端登录成功之后，在控制台输入<code>userId + 空格 + 消息</code>，这里的 userId 是消息接收方的标识， 消息接收方的控制台接着就会显示另外一个客户端发来的消息。</li>
+</ol>
+</blockquote>
+<h2 id="2、-一对一单聊原理"><a href="#2、-一对一单聊原理" class="headerlink" title="2、 一对一单聊原理"></a>2、 一对一单聊原理</h2><ol>
+<li>A 要和 B 聊天，首先 A 和 B 需要与服务器建立连接，然后进行一次登录流程，服务端保存用户标识和 TCP 连接的映射关系。</li>
+<li>A 发消息给 B，首先需要将带有 B 标识的消息数据包发送到服务器，然后服务器从消息数据包中拿到 B 的标识，找到对应的 B 的连接，将消息发送给 B。</li>
+</ol>
+<h2 id="3、一对一单聊实现"><a href="#3、一对一单聊实现" class="headerlink" title="3、一对一单聊实现"></a>3、一对一单聊实现</h2><blockquote>
+<p>总思路：</p>
+<ol>
+<li>我们定义一个会话类 <code>Session</code> 用户维持用户的登录信息，用户登录的时候绑定 Session 与 channel，用户登出或者断线的时候解绑 Session 与 channel。</li>
+<li>服务端处理消息的时候，通过消息接收方的标识，拿到消息接收方的 channel，调用 <code>writeAndFlush()</code> 将消息发送给消息接收方。</li>
+</ol>
+</blockquote>
+<ol>
+<li>用户登录状态与 channel 的绑定</li>
+</ol>
+<blockquote>
+<p>登录的时候保存会话信息，登出的时候删除会话信息。</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoginRequestHandler.java</span><br><span class="line">Session.java</span><br><span class="line">SessionUtil.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="2">
+<li>服务端接收消息并转发的实现</li>
+</ol>
+<blockquote>
+<ol>
+<li>服务端在收到客户端发来的消息之后，首先拿到当前用户，也就是消息发送方的会话信息。</li>
+<li>拿到消息发送方的会话信息之后，构造一个发送给客户端的消息对象 <code>MessageResponsePacket</code>，填上发送消息方的用户标识、昵称、消息内容。</li>
+<li>通过消息接收方的标识拿到对应的 channel。</li>
+<li>如果消息接收方当前是登录状态，直接发送，如果不在线，控制台打印出一条警告消息。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MessageRequestPacket.java</span><br><span class="line">MessageRequestHandler.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="3">
+<li>客户端收消息的逻辑处理</li>
+</ol>
+<blockquote>
+<p>客户端收到消息之后，只是把当前消息打印出来</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MessageResponseHandler.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="4">
+<li>客户端控制台登录和发送消息</li>
+</ol>
+<blockquote>
+<p>我们在客户端启动的时候，起一个线程</p>
+<ol>
+<li>如果当前用户还未登录，我们在控制台输入一个用户名，然后构造一个登录数据包发送给服务器，发完之后，我们等待一个超时时间，可以当做是登录逻辑的最大处理时间，这里就简单粗暴点了。</li>
+<li>如果当前用户已经是登录状态，我们可以在控制台输入消息接收方的 userId，然后输入一个空格，再输入消息的具体内容，然后，我们就可以构建一个消息数据包，发送到服务端。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NettyClient.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<p>测试：略</p>
+<h1 id="实战：群聊的发起与通知"><a href="#实战：群聊的发起与通知" class="headerlink" title="实战：群聊的发起与通知"></a>实战：群聊的发起与通知</h1><blockquote>
+<p>如何创建一个群聊，并通知到群聊中的各位成员</p>
+</blockquote>
+<h2 id="1、最终效果-1"><a href="#1、最终效果-1" class="headerlink" title="1、最终效果"></a>1、最终效果</h2><blockquote>
+<ol>
+<li>首先，依然是三位用户依次登录到服务器，分别是闪电侠、极速、萨维塔。</li>
+<li>然后，我们在闪电侠的控制台输入 <code>createGroup</code> 指令，提示创建群聊需要输入 userId 列表，然后我们输入以英文逗号分隔的 userId。</li>
+<li>群聊创建成功之后，分别在服务端和三个客户端弹出提示消息，包括群的 ID 以及群里各位用户的昵称。</li>
+</ol>
+</blockquote>
+<h2 id="2、群聊原理"><a href="#2、群聊原理" class="headerlink" title="2、群聊原理"></a>2、群聊原理</h2><blockquote>
+<ol>
+<li>A，B，C 依然会经历登录流程，服务端保存用户标识对应的 TCP 连接</li>
+<li>A 发起群聊的时候，将 A，B，C 的标识发送至服务端，服务端拿到之后建立一个群聊 ID，然后把这个 ID 与 A，B，C 的标识绑定</li>
+<li>群聊里面任意一方在群里聊天的时候，将群聊 ID 发送至服务端，服务端拿到群聊 ID 之后，取出对应的用户标识，遍历用户标识对应的 TCP 连接，就可以将消息发送至每一个群聊成员</li>
+</ol>
+</blockquote>
+<h2 id="3、控制台程序重构"><a href="#3、控制台程序重构" class="headerlink" title="3、控制台程序重构"></a>3、控制台程序重构</h2><blockquote>
+<p>由于控制台输入的指令越来越多，需要重构</p>
+<ol>
+<li>我们在这个管理类中，把所有要管理的控制台指令都塞到一个 map 中。</li>
+<li>执行具体操作的时候，我们先获取控制台第一个输入的指令，这里以字符串代替，比较清晰（这里我们已经实现了上小节课后思考题中的登出操作），然后通过这个指令拿到对应的控制台命令执行器执行。</li>
+</ol>
+</blockquote>
+<ol>
+<li>创建控制台命令执行器</li>
+</ol>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConsoleCommand.java</span><br></pre></td></tr></table></figure></div>
+
+<ol start="2">
+<li>管理控制台命令执行器</li>
+</ol>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConsoleCommandManager.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<p>举个栗子：</p>
+<ol>
+<li><p>首先，我们在控制台输入 <code>createGroup</code>，然后我们按下回车，就会进入 <code>CreateGroupConsoleCommand</code> 这个类进行处理</p>
+</li>
+<li><p>进入到 <code>CreateGroupConsoleCommand</code> 的逻辑之后，我们创建了一个群聊创建请求的数据包，然后提示输入以英文逗号分隔的 userId 的列表，填充完这个数据包之后，调用 <code>writeAndFlush()</code> 我们就可以发送一个创建群聊的指令到服务端。</p>
+</li>
+</ol>
+<p>最后，客户端的控制台线程相关的代码。</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NettyClient.java  startConsoleThread</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="4、创建群聊的实现"><a href="#4、创建群聊的实现" class="headerlink" title="4、创建群聊的实现"></a>4、创建群聊的实现</h2><ol>
+<li>客户端发送创建群聊请求</li>
+</ol>
+<blockquote>
+<p>发送一个 <code>CreateGroupRequestPacket</code> 数据包到服务端，它只包含了一个列表，这个列表就是需要拉取群聊的用户列表</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CreateGroupRequestPacket.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="2">
+<li>服务端处理创建群聊请求</li>
+</ol>
+<blockquote>
+<p>整个过程可以分为以下几个过程</p>
+<ol>
+<li>首先，我们这里创建一个 <code>ChannelGroup</code>。这里简单介绍一下 <code>ChannelGroup</code>：它可以把多个 chanel 的操作聚合在一起，可以往它里面添加删除 channel，可以进行 channel 的批量读写，关闭等操作，详细的功能读者可以自行翻看这个接口的方法。这里我们一个群组其实就是一个 channel 的分组集合，使用 <code>ChannelGroup</code> 非常方便。</li>
+<li>接下来，我们遍历待加入群聊的 userId，如果存在该用户，就把对应的 channel 添加到<code>ChannelGroup</code> 中，用户昵称也添加到昵称列表中。</li>
+<li>然后，我们创建一个创建群聊响应的对象，其中 <code>groupId</code> 是随机生成的，群聊创建结果一共三个字段，这里就不展开对这个类进行说明了。</li>
+<li>最后，我们调用 <code>ChannelGroup</code> 的聚合发送功能，将拉群的通知批量地发送到客户端，接着在服务端控制台打印创建群聊成功的信息，至此，服务端处理创建群聊请求的逻辑结束。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyServer.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> CreateGroupRequestHandler());</span><br><span class="line"></span><br><span class="line"><span class="comment">// --CreateGroupRequestHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="3">
+<li>客户端处理创建群聊响应</li>
+</ol>
+<blockquote>
+<p>仅仅是把创建群聊成功之后的具体信息打印出来</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyClient.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> CreateGroupResponseHandler());</span><br><span class="line"><span class="comment">// --CreateGroupResponseHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h1 id="实战：群聊的成员管理（加入与退出，获取成员列表）"><a href="#实战：群聊的成员管理（加入与退出，获取成员列表）" class="headerlink" title="实战：群聊的成员管理（加入与退出，获取成员列表）"></a>实战：群聊的成员管理（加入与退出，获取成员列表）</h1><blockquote>
+<p>加入群聊、退出群聊、获取群成员列表</p>
+</blockquote>
+<h2 id="1、最终效果-2"><a href="#1、最终效果-2" class="headerlink" title="1、最终效果"></a>1、最终效果</h2><blockquote>
+<ol>
+<li>闪电侠先拉逆闪和极速加入了群聊，控制台输出群创建成功的消息。</li>
+<li>随后在萨维塔的控制台输入 “joinGroup” 之后再输入群聊的 id，加入群聊，控制台显示加入群成功。</li>
+<li>在闪电侠的控制台输入 “listGroupMembers” 之后再输入群聊的 id，展示了当前群聊成员包括了极速、萨维塔、闪电侠、逆闪。</li>
+<li>萨维塔的控制台输入 “quitGroup” 之后再输入群聊的 id，退出群聊，控制台显示退群成功。</li>
+<li>最后在闪电侠的控制台输入 “listGroupMembers” 之后再输入群聊的 ID，展示了当前群聊成员已无萨维塔。</li>
+</ol>
+</blockquote>
+<h2 id="2、群的加入"><a href="#2、群的加入" class="headerlink" title="2、群的加入"></a>2、群的加入</h2><ol>
+<li>控制台添加群加入命令处理器</li>
+</ol>
+<blockquote>
+<p>我们在控制台先添加群加入命令处理器 <code>JoinGroupConsoleCommand</code>，在这个处理器中，我们创建一个指令对象 <code>JoinGroupRequestPacket</code>，填上群 id 之后，将数据包发送至服务端。之后，我们将该控制台指令添加到 <code>ConsoleCommandManager</code>。</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --JoinGroupConsoleCommand.java</span></span><br><span class="line"><span class="comment">// --ConsoleCommandManager.java</span></span><br><span class="line">consoleCommandMap.put(<span class="string">"joinGroup"</span>, <span class="keyword">new</span> JoinGroupConsoleCommand());</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="2">
+<li>服务端处理群加入请求</li>
+</ol>
+<blockquote>
+<ol>
+<li>首先，通过 groupId 拿到对应的 <code>ChannelGroup</code>，之后，只需要调用 <code>ChannelGroup.add()</code> 方法，将加入群聊的用户的 channel 添加进去，服务端即完成了加入群聊的逻辑。</li>
+<li>然后，构造一个加群响应，填入 groupId 之后，调用 <code>writeAndFlush()</code> 发送给加入群聊的客户端。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyServer.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> JoinGroupRequestHandler());</span><br><span class="line"><span class="comment">// --JoinGroupRequestHandler.java</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// --CreateGroupRequestHandler</span></span><br><span class="line"><span class="comment">// 5. 保存群组相关的信息</span></span><br><span class="line">SessionUtil.bindChannelGroup(groupId, channelGroup);</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="3">
+<li>客户端处理群加入响应</li>
+</ol>
+<blockquote>
+<p>该处理器的逻辑很简单，只是简单的将加群的结果输出到控制台</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyClient.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> JoinGroupResponseHandler());</span><br><span class="line"><span class="comment">// --JoinGroupResponseHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="3、群的退出"><a href="#3、群的退出" class="headerlink" title="3、群的退出"></a>3、群的退出</h2><blockquote>
+<p><code>QuitGroupRequestHandler</code> 和 <code>JoinGroupRequestHandler</code> 其实是一个逆向的过程</p>
+<ol>
+<li>首先，通过 groupId 拿到对应的 <code>ChannelGroup</code>，之后，只需要调用 <code>ChannelGroup.remove()</code> 方法，将当前用户的 channel 删除，服务端即完成了退群的逻辑。</li>
+<li>然后，构造一个退群响应，填入 groupId 之后，调用 <code>writeAndFlush()</code> 发送给退群的客户端。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --QuitGroupRequestHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="4、获取成员列表"><a href="#4、获取成员列表" class="headerlink" title="4、获取成员列表"></a>4、获取成员列表</h2><ol>
+<li>控制台添加获取群列表命令处理器</li>
+</ol>
+<blockquote>
+<p>我们在控制台先添加获取群列表命令处理器 <code>ListGroupMembersConsoleCommand</code>，在这个处理器中，我们创建一个指令对象 <code>ListGroupMembersRequestPacket</code>，填上群 id 之后，将数据包发送至服务端。之后，我们将该控制台指令添加到 <code>ConsoleCommandManager</code>。</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --ListGroupMembersConsoleCommand.java</span></span><br><span class="line"><span class="comment">// --ConsoleCommandManager.java</span></span><br><span class="line">consoleCommandMap.put(<span class="string">"listGroupMembers"</span>, <span class="keyword">new</span> ListGroupMembersConsoleCommand());</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="2">
+<li>服务端处理获取成员列表请求</li>
+</ol>
+<blockquote>
+<ol>
+<li>首先，我们通过 groupId 拿到对应的 <code>ChannelGroup</code>。</li>
+<li>接着，我们创建一个 sessionList 用来装载群成员信息，我们遍历 channel 的每个 session，把对应的用户信息装到 sessionList 中，实际生产环境中，这里可能会构造另外一个对象来装载用户信息而非 Session，这里我们就简单粗暴点了，改造起来不难。</li>
+<li>最后，我们构造一个获取成员列表的响应指令数据包，填入 groupId 和群成员的信息之后，调用 <code>writeAndFlush()</code> 发送给发起获取成员列表的客户端。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyServer.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> ListGroupMembersRequestHandler());</span><br><span class="line"><span class="comment">// --ListGroupMembersRequestHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="3">
+<li>客户端处理获取成员列表响应</li>
+</ol>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NettyClient.java</span><br><span class="line">ListGroupMembersResponseHandler.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="5、总结"><a href="#5、总结" class="headerlink" title="5、总结"></a>5、总结</h2><p>添加一个服务端和客户端交互的新功能只需要遵循以下的步骤：</p>
+<ol>
+<li>创建控制台指令对应的 <code>ConsoleCommand</code> 并添加到 <code>ConsoleCommandManager</code>。</li>
+<li>控制台输入指令和数据之后填入协议对应的指令数据包 - <code>xxxRequestPacket</code>，将请求写到服务端。</li>
+<li>服务端创建对应的 <code>xxxRequestPacketHandler</code> 并添加到服务端的 pipeline 中，在 <code>xxxRequestPacketHandler</code> 处理完之后构造对应的 <code>xxxResponsePacket</code> 发送给客户端。</li>
+<li>客户端创建对应的 <code>xxxResponsePacketHandler</code> 并添加到客户端的 pipeline 中，最后在 <code>xxxResponsePacketHandler</code> 完成响应的处理。</li>
+<li>最后，最容易忽略的一点就是，新添加 <code>xxxPacket</code> 别忘了完善编解码器 <code>PacketCodec</code>中的 <code>packetTypeMap</code>！</li>
+</ol>
+<h1 id="实战：群聊消息的收发及-Netty-性能优化"><a href="#实战：群聊消息的收发及-Netty-性能优化" class="headerlink" title="实战：群聊消息的收发及 Netty 性能优化"></a>实战：群聊消息的收发及 Netty 性能优化</h1><h2 id="1、群聊消息最终效果"><a href="#1、群聊消息最终效果" class="headerlink" title="1、群聊消息最终效果"></a>1、群聊消息最终效果</h2><blockquote>
+<ol>
+<li>在闪电侠的控制台，输入 “sendToGroup” 指令之后，再输入 groupId + 空格 + 消息内容，发送消息给群里各位用户，随后，群组里的所有用户的控制台都显示了群消息。</li>
+<li>随后，陆续在逆闪和极速的控制台做做相同的操作，群组里的所有用户的控制台陆续展示了群消息</li>
+</ol>
+</blockquote>
+<h2 id="2、群聊消息的收发的实现"><a href="#2、群聊消息的收发的实现" class="headerlink" title="2、群聊消息的收发的实现"></a>2、群聊消息的收发的实现</h2><blockquote>
+<ol>
+<li>首先，通过 groupId 构造群聊响应 <code>GroupMessageResponsePacket</code>，然后再把发送群聊的用户信息填入，这里的用户信息我们就直接复用与 channel 绑定的 session了。</li>
+<li>然后，我们拿到对应群组的 <code>ChannelGroup</code>，通过 <code>writeAndFlush()</code> 写到客户端。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GroupMessageRequestHandler.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="3、共享-handler"><a href="#3、共享-handler" class="headerlink" title="3、共享 handler"></a>3、共享 handler</h2><blockquote>
+<p>问题引入：</p>
+<ol>
+<li>服务端的 pipeline 链里面已经有 12 个 handler，其中，与指令相关的 handler 有 9 个。</li>
+<li>Netty 在这里的逻辑是：每次有新连接到来的时候，都会调用 <code>ChannelInitializer</code> 的 <code>initChannel()</code> 方法，然后这里 9 个指令相关的 handler 都会被 new 一次。</li>
+<li>其实这里的每一个指令 handler，他们内部都是没有成员变量的，也就是说是无状态的，我们完全可以使用单例模式，即调用 <code>pipeline().addLast()</code> 方法的时候，都直接使用单例，不需要每次都 new，提高效率，也避免了创建很多小的对象。</li>
+</ol>
+</blockquote>
+<p>拿 <code>LoginRequestHandler</code> 举例，来看一下如何改造</p>
+<blockquote>
+<ol>
+<li>首先，非常重要的一点，如果一个 handler 要被多个 channel 进行共享，必须要加上 <code>@ChannelHandler.Sharable</code> 显示地告诉 Netty，这个 handler 是支持多个 channel 共享的，否则会报错，读者可以自行尝试一下。</li>
+<li>然后，我们仿照 Netty 源码里面单例模式的写法，构造一个单例模式的类。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LoginRequestHandler.java</span><br></pre></td></tr></table></figure></div>
+
+
+
+<p>服务端的代理里面就可以这么写</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --NettyServer.java</span></span><br><span class="line"><span class="comment">// 单例模式，多个 channel 共享同一个 handler</span></span><br><span class="line">ch.pipeline().addLast(LoginRequestHandler.INSTANCE);</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="4、压缩-handler-合并编解码器"><a href="#4、压缩-handler-合并编解码器" class="headerlink" title="4、压缩 handler - 合并编解码器"></a>4、压缩 handler - 合并编解码器</h2><blockquote>
+<p>问题引入：</p>
+<p>pipeline 中第一个 handler - <code>Spliter</code>，我们是无法动它的，因为他内部实现是与每个 <code>channel</code>有关，每个 <code>Spliter</code> 需要维持每个 channel 当前读到的数据，也就是说他是有状态的。</p>
+<p> 而 <code>PacketDecoder</code> 与 <code>PacketEncoder</code> 我们是可以继续改造的，Netty 内部提供了一个类，叫做 <code>MessageToMessageCodec</code>，使用它可以让我们的编解码操作放到一个类里面去实现，首先我们定义一个 <code>PacketCodecHandler</code></p>
+<p>PacketCodecHandler</p>
+<ol>
+<li>首先，这里 <code>PacketCodecHandler</code>，他是一个无状态的 handler，因此，同样可以使用单例模式来实现。</li>
+<li>我们看到，我们需要实现 <code>decode()</code> 和 <code>encode()</code> 方法，decode 是将二进制数据 ByteBuf 转换为 java 对象 Packet，而 encode 操作是一个相反的过程，在 <code>encode()</code> 方法里面，我们调用了 channel 的 内存分配器手工分配了 <code>ByteBuf</code>。</li>
+</ol>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --PacketCodecHandler.java</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="5、缩短事件传播路径"><a href="#5、缩短事件传播路径" class="headerlink" title="5、缩短事件传播路径"></a>5、缩短事件传播路径</h2><blockquote>
+<p>问题引入：</p>
+<p>随着指令相关的 handler 越来越多，handler 链越来越长，在事件传播过程中性能损耗会被逐渐放大，因为解码器解出来的每个 Packet 对象都要在每个 handler 上经过一遍，我们接下来来看一下如何缩短这个事件传播的路径。</p>
+</blockquote>
+<ol>
+<li>压缩 handler - 合并平行 handler</li>
+</ol>
+<blockquote>
+<p>对我们这个应用程序来说，每次 decode 出来一个指令对象之后，其实只会在一个指令 handler 上进行处理，因此，我们其实可以把这么多的指令 handler 压缩为一个 handler</p>
+<p>IMHandler：</p>
+<ol>
+<li>首先，IMHandler 是无状态的，依然是可以写成一个单例模式的类。</li>
+<li>我们定义一个 map，存放指令到各个指令处理器的映射。</li>
+<li>每次回调到 IMHandler 的 <code>channelRead0()</code> 方法的时候，我们通过指令找到具体的 handler，然后调用指令 handler 的 <code>channelRead</code>，他内部会做指令类型转换，最终调用到每个指令 handler 的 <code>channelRead0()</code> 方法。</li>
+</ol>
+<p>效果：</p>
+<p>所有的平行指令处理 handler，我们都压缩到了一个 <code>IMHandler</code>，并且 <code>IMHandler</code> 和指令 handler 均为单例模式，在单机十几万甚至几十万的连接情况下，性能能得到一定程度的提升</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// --IMHandler.java</span></span><br><span class="line"><span class="comment">// --NettyServer.java</span></span><br><span class="line">ch.pipeline().addLast(<span class="keyword">new</span> Spliter());</span><br><span class="line">ch.pipeline().addLast(PacketCodecHandler.INSTANCE);            ch.pipeline().addLast(LoginRequestHandler.INSTANCE);</span><br><span class="line">ch.pipeline().addLast(AuthHandler.INSTANCE);</span><br><span class="line">ch.pipeline().addLast(IMHandler.INSTANCE);</span><br></pre></td></tr></table></figure></div>
+
+
+
+<ol start="2">
+<li>更改事件传播源</li>
+</ol>
+<blockquote>
+<p><code>ctx.writeAndFlush()</code> 事件传播路径</p>
+<p><code>ctx.channel().writeAndFlush()</code> 事件传播路径</p>
+<p>? </p>
+<p>在我们的应用程序中，当我们没有改造编解码之前，我们必须调用 <code>ctx.channel().writeAndFlush()</code>, 而经过改造之后，我们的编码器（既属于 inBound, 又属于 outBound 类型的 handler）已处于 pipeline 的最前面，因此，可以大胆使用 <code>ctx.writeAndFlush()</code>。</p>
+</blockquote>
+<h2 id="6、减少阻塞主线程的操作"><a href="#6、减少阻塞主线程的操作" class="headerlink" title="6、减少阻塞主线程的操作"></a>6、减少阻塞主线程的操作</h2><blockquote>
+<p>问题引入：</p>
+<p>只要有一个 channel 的一个 handler 中的 <code>channelRead0()</code>方法阻塞了 NIO 线程，最终都会拖慢绑定在该 NIO 线程上的其他所有的 channel</p>
+</blockquote>
+<p>而我们需要怎么做？对于耗时的操作，我们需要把这些耗时的操作丢到我们的业务线程池中去处理。下面是解决方案的伪代码：</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ThreadPool threadPool = xxx;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">channelRead0</span><span class="params">(ChannelHandlerContext ctx, T packet)</span> </span>&#123;</span><br><span class="line">    threadPool.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="comment">// 1. balabala 一些逻辑</span></span><br><span class="line">        <span class="comment">// 2. 数据库或者网络等一些耗时的操作</span></span><br><span class="line">        <span class="comment">// 3. writeAndFlush()</span></span><br><span class="line">        <span class="comment">// 4. balabala 其他的逻辑</span></span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>这样，就可以避免一些耗时的操作影响 Netty 的 NIO 线程，从而影响其他的 channel。</p>
+<h2 id="7、如何准确统计处理时长"><a href="#7、如何准确统计处理时长" class="headerlink" title="7、如何准确统计处理时长"></a>7、如何准确统计处理时长</h2><blockquote>
+<p> <code>writeAndFlush()</code> 这个方法如果在非 NIO 线程（这里，我们其实是在业务线程中调用了该方法）中执行，它是一个异步的操作，调用之后，其实是会立即返回的，剩下的所有的操作，都是 Netty 内部有一个任务队列异步执行的</p>
+</blockquote>
+<p>那么如何才能判断 <code>writeAndFlush()</code> 执行完毕呢？我们可以这么做</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">channelRead0</span><span class="params">(ChannelHandlerContext ctx, T packet)</span> </span>&#123;</span><br><span class="line">    threadPool.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="keyword">long</span> begin = System.currentTimeMillis();</span><br><span class="line">        <span class="comment">// 1. balabala 一些逻辑</span></span><br><span class="line">        <span class="comment">// 2. 数据库或者网络等一些耗时的操作</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 3. writeAndFlush</span></span><br><span class="line">        xxx.writeAndFlush().addListener(future -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (future.isDone()) &#123;</span><br><span class="line">                <span class="comment">// 4. balabala 其他的逻辑</span></span><br><span class="line">                <span class="keyword">long</span> time =  System.currentTimeMillis() - begin;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h1 id="实战：心跳与空闲检测"><a href="#实战：心跳与空闲检测" class="headerlink" title="实战：心跳与空闲检测"></a>实战：心跳与空闲检测</h1><h2 id="1、网络问题"><a href="#1、网络问题" class="headerlink" title="1、网络问题"></a>1、网络问题</h2><p>连接假死</p>
+<p>连接假死的现象是：在某一端（服务端或者客户端）看来，底层的 TCP 连接已经断开了，但是应用程序并没有捕获到，因此会认为这条连接仍然是存在的，从 TCP 层面来说，只有收到四次握手数据包或者一个 RST 数据包，连接的状态才表示已断开。</p>
+<p>连接假死会带来以下两大问题</p>
+<ol>
+<li>对于服务端来说，因为每条连接都会耗费 cpu 和内存资源，大量假死的连接会逐渐耗光服务器的资源，最终导致性能逐渐下降，程序奔溃。</li>
+<li>对于客户端来说，连接假死会造成发送数据超时，影响用户体验。</li>
+</ol>
+<p>通常，连接假死由以下几个原因造成的</p>
+<ol>
+<li>应用程序出现线程堵塞，无法进行数据的读写。</li>
+<li>客户端或者服务端网络相关的设备出现故障，比如网卡，机房故障。</li>
+<li>公网丢包。公网环境相对内网而言，非常容易出现丢包，网络抖动等现象，如果在一段时间内用户接入的网络连续出现丢包现象，那么对客户端来说数据一直发送不出去，而服务端也是一直收不到客户端来的数据，连接就一直耗着。</li>
+</ol>
+<p>接下来，我们分别从服务端和客户端的角度来解决连接假死的问题。</p>
+<h2 id="2、服务端空闲检测"><a href="#2、服务端空闲检测" class="headerlink" title="2、服务端空闲检测"></a>2、服务端空闲检测</h2><p>对于服务端来说，客户端的连接如果出现假死，那么服务端将无法收到客户端的数据，也就是说，如果能一直收到客户端发来的数据，那么可以说明这条连接还是活的，因此，服务端对于连接假死的应对策略就是空闲检测。</p>
+<p>何为空闲检测？简化一下，我们的服务端只需要检测一段时间内，是否收到过客户端发来的数据即可，Netty 自带的 <code>IdleStateHandler</code> 就可以实现这个功能。</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IMIdleStateHandler.java</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<ol>
+<li>首先，我们观察一下 <code>IMIdleStateHandler</code> 的构造函数，他调用父类 <code>IdleStateHandler</code> 的构造函数，有四个参数，其中第一个表示读空闲时间，指的是在这段时间内如果没有数据读到，就表示连接假死；第二个是写空闲时间，指的是 在这段时间如果没有写数据，就表示连接假死；第三个参数是读写空闲时间，表示在这段时间内如果没有产生数据读或者写，就表示连接假死。写空闲和读写空闲为0，表示我们不关心者两类条件；最后一个参数表示时间单位。在我们的例子中，表示的是：如果 15 秒内没有读到数据，就表示连接假死。</li>
+<li>连接假死之后会回调 <code>channelIdle()</code> 方法，我们这个方法里面打印消息，并手动关闭连接。</li>
+</ol>
+</blockquote>
+<p>接下来，我们把这个 handler 插入到服务端 pipeline 的最前面</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NettyServer.java</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>为什么要插入到最前面？是因为如果插入到最后面的话，如果这条连接读到了数据，但是在 inBound 传播的过程中出错了或者数据处理完完毕就不往后传递了（我们的应用程序属于这类），那么最终 <code>IMIdleStateHandler</code> 就不会读到数据，最终导致误判。</p>
+</blockquote>
+<p>思考，在一段时间之内没有读到客户端的数据，是否一定能判断连接假死呢？并不能，如果在这段时间之内客户端确实是没有发送数据过来，但是连接是 ok 的，那么这个时候服务端也是不能关闭这条连接的，为了防止服务端误判，我们还需要在客户端做点什么。</p>
+<h2 id="3、客户端定时发心跳"><a href="#3、客户端定时发心跳" class="headerlink" title="3、客户端定时发心跳"></a>3、客户端定时发心跳</h2><blockquote>
+<p>可以在客户端定期发送数据到服务端，通常这个数据包称为心跳数据包，接下来，我们定义一个 handler，定期发送心跳给服务端</p>
+</blockquote>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HeartBeatTimerHandler.java</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p><code>schedule()</code>，类似 jdk 的延时任务机制，可以隔一段时间之后执行一个任务，而我们这边是实现了每隔 5 秒(实现方法是方法回调自己，每回调一次自己，都会触发计时器延时执行，回调会造成栈溢出吗？？)，向服务端发送一个心跳数据包</p>
+<p>实际在生产环境中，我们的发送心跳间隔时间和空闲检测时间可以略长一些，可以设置为几分钟级别</p>
+</blockquote>
+<p>上面其实解决了服务端的空闲检测问题，服务端这个时候是能够在一定时间段之内关掉假死的连接，释放连接的资源了，但是对于客户端来说，我们也需要检测到假死的连接。</p>
+<h2 id="4、-服务端回复心跳与客户端空闲检测"><a href="#4、-服务端回复心跳与客户端空闲检测" class="headerlink" title="4、 服务端回复心跳与客户端空闲检测"></a>4、 服务端回复心跳与客户端空闲检测</h2><p>客户端的空闲检测其实和服务端一样，依旧是在客户端 pipeline 的最前方插入 <code>IMIdleStateHandler</code></p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NettyClient.java</span><br></pre></td></tr></table></figure></div>
+
+<p>服务端也要定期发送心跳给客户端。</p>
+<p>而其实在前面我们已经实现了客户端向服务端定期发送心跳，服务端这边其实只要在收到心跳之后回复客户端，给客户端发送一个心跳响应包即可。如果在一段时间之内客户端没有收到服务端发来的数据，也可以判定这条连接为假死状态。</p>
+<p>因此，服务端的 pipeline 中需要再加上如下一个 handler - <code>HeartBeatRequestHandler</code>，由于这个 handler 的处理其实是无需登录的，所以，我们将该 handler 放置在 <code>AuthHandler</code> 前面</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NettyServer.java</span><br><span class="line">HeartBeatRequestHandler.java</span><br></pre></td></tr></table></figure></div>
+
+<blockquote>
+<p>实现非常简单，只是简单地回复一个 <code>HeartBeatResponsePacket</code> 数据包。客户端在检测到假死连接之后，断开连接，然后可以有一定的策略去重连，重新登录等等…</p>
+</blockquote>
+<p>思考</p>
+<ol>
+<li><code>IMIdleStateHandler</code> 能否实现为单例模式，为什么？</li>
+</ol>
+<p>不能，因为每一个连接都需维持一个属于自己的15秒空闲检测</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><h2 id="1-Netty-是什么？"><a href="#1-Netty-是什么？" class="headerlink" title="1. Netty 是什么？"></a>1. Netty 是什么？</h2><p>经过我们整个小册的学习，我们可以了解到，Netty 其实可以看做是对 BIO 和 NIO 的封装，并提供良好的 IO 读写相关的 API，另外还提供了非常多的开箱即用的 handler，工具类等等。</p>
+<h2 id="2-服务端和客户端启动"><a href="#2-服务端和客户端启动" class="headerlink" title="2. 服务端和客户端启动"></a>2. 服务端和客户端启动</h2><p>Netty 提供了两大启动辅助类，<code>ServerBootstrap</code> 和 <code>Bootstrap</code>， 他们的启动参数类似，都是分为</p>
+<ol>
+<li>配置 IO 类型，配置线程模型。</li>
+<li>配置 TCP 参数，attr 属性。</li>
+<li>配置 handler。server 端除了配置 handler，还需要配置 childHandler，他是定义每条连接的处理器。</li>
+</ol>
+<h2 id="3-ByteBuf"><a href="#3-ByteBuf" class="headerlink" title="3. ByteBuf"></a>3. ByteBuf</h2><p>接着，我们又学习了 Netty 对二进制数据的抽象类 ByteBuf，ByteBuf 底层又可以细分为堆内存和堆外内存，它的 API 要比 jdk 提供的 ByteBuffer 要更好用，ByteBuf 所有的操作其实都是基于读指针和写指针来进行操作的，把申请到的一块内存划分为可读区、可写区，另外还提供了自动扩容的功能。</p>
+<h2 id="4-自定义协议拆包与编解码"><a href="#4-自定义协议拆包与编解码" class="headerlink" title="4. 自定义协议拆包与编解码"></a>4. 自定义协议拆包与编解码</h2><p>通常，我们要实现客户端与服务端的通信，需要自定义协议，说白了就是双方商量在字节流里面，对应位置的字节段分别表示什么含义。</p>
+<p>我们用的最多的协议呢就是基于长度的协议，一个协议数据包里面包含了一个长度字段，我们在解析的时候，首先第一步就是从字节流里面根据自定义协议截取出一个个数据包，使用的最多的拆包器就是 <code>LengthFieldBasedFrameDecoder</code>，只需要给他配置一些参数，即可实现自动拆包。</p>
+<p>拆包之后呢，我们就拿到了代表字节流区段的一个个 ByteBuf，我们的解码器的作用就是把这些个 ByteBuf 变成一个个 java 对象，这样我们后续的 handler 就可以进行相应的逻辑的处理。</p>
+<h2 id="5-handler-与-pipeline"><a href="#5-handler-与-pipeline" class="headerlink" title="5. handler 与 pipeline"></a>5. handler 与 pipeline</h2><p>Netty 对逻辑处理流的处理其实和 TCP 协议栈的思路非常类似，分为输入和输出，也就是 inBound 和 outBound 类型的 handler，inBound 类 handler 的添加顺序与事件传播的顺序相同，而 outBound 类 handler 的添加顺序与事件传播的顺序相反，这里一定要注意。</p>
+<p>无状态的 handler 可以改造为单例模式，但是千万记得要加 <code>@ChannelHandler.Sharable</code> 注解，平行等价的 handler 可以使用压缩的方式减少事件传播路径，调用 <code>ctx.xxx()</code> 而不是 <code>ctx.channel().xxx()</code> 也可以减少事件传播路径，不过要看应用场景。</p>
+<p>另外，每个 handler 都有自己的生命周期，Netty 会在 channel 或者 channelHandler 处于不同状态的情况下回调相应的方法，channelHandler 也可以动态添加，特别适用于一次性处理的 handler，用完即删除，干干净净。</p>
+<h2 id="6-耗时操作的处理与统计"><a href="#6-耗时操作的处理与统计" class="headerlink" title="6. 耗时操作的处理与统计"></a>6. 耗时操作的处理与统计</h2><p>对于耗时的操作，不要直接在 NIO 线程里做，比如，不要在 <code>channelRead0()</code> 方法里做一些访问数据库或者网络相关的逻辑，要扔到自定义线程池里面去做，然后要注意这个时候，<code>writeAndFlush()</code> 的执行是异步的，需要通过添加监听回调的方式来判断是否执行完毕，进而进行延时的统计。</p>
+<h2 id="关于进阶学习-Netty"><a href="#关于进阶学习-Netty" class="headerlink" title="关于进阶学习 Netty"></a>关于进阶学习 Netty</h2><p>参考原作者：<a href="https://juejin.im/book/5b4bc28bf265da0f60130116/section/5b4db177f265da0f9e589281" target="_blank" rel="noopener">扩展：进阶学习 Netty 的方向与资料</a></p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Machine</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://machine4869.gitee.io/2019/08/09/20190809142144254/">https://machine4869.gitee.io/2019/08/09/20190809142144254/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://machine4869.gitee.io">哑舍</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Netty/">Netty    </a></div><div class="post_share"><div class="social-share" data-image="/img/default_p11.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.png" alt="微信"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付宝"><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2019/08/13/20190813154158451/"><img class="prev_cover lazyload" data-src="/img/default_p12.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>用netty实现一个简单的rpc</span></div></a></div><div class="next-post pull_right"><a href="/2019/07/28/20190728161454796/"><img class="next_cover lazyload" data-src="/img/default_p5.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>Netty项目-仿写微信 IM 即时通讯系统(2)</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2019/08/13/20190813154158451/" title="用netty实现一个简单的rpc"><img class="relatedPosts_cover lazyload"data-src="/img/default_p12.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-08-13</div><div class="relatedPosts_title">用netty实现一个简单的rpc</div></div></a></div><div class="relatedPosts_item"><a href="/2019/07/28/20190728161454796/" title="Netty项目-仿写微信 IM 即时通讯系统(2)"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-07-28</div><div class="relatedPosts_title">Netty项目-仿写微信 IM 即时通讯系统(2)</div></div></a></div><div class="relatedPosts_item"><a href="/2019/07/22/20190722161728334/" title="Netty项目-仿写微信 IM 即时通讯系统(1)"><img class="relatedPosts_cover lazyload"data-src="/img/default_p10.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-07-22</div><div class="relatedPosts_title">Netty项目-仿写微信 IM 即时通讯系统(1)</div></div></a></div><div class="relatedPosts_item"><a href="/2019/07/22/20190722134143780/" title="Netty基础"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-07-22</div><div class="relatedPosts_title">Netty基础</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script><script>var notify = true == true ? true : false;
+var verify = false == true ? true : false;
+var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify:notify,
+  verify:verify,
+  appId:'yPVvDIaWlODDhs0bbECwLIIp-gzGzoHsz',
+  appKey:'VyOIa40LxnjURzW1HUCiwTpV',
+  placeholder:'记得留下你的昵称及邮箱，以便收到答复~',
+  avatar:'monsterid',
+  guest_info:guest_info,
+  pageSize:'10',
+  lang:'zh-cn',
+  recordIP: true
+});</script></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2020 By Machine</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://machine4869.gitee.io/">blog</a>!</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">简</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script id="canvas_nest" color="215,215,215" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

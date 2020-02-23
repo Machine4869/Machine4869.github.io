@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>高并发解决方案（1）：扩容&amp;缓存 | 哑舍</title><meta name="description" content="高并发解决方案（1）：扩容&amp;缓存"><meta name="keywords" content="Java并发编程与高并发解决方案"><meta name="author" content="Machine"><meta name="copyright" content="Machine"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/cat2.ico"><link rel="preconnect" href="//cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link rel="preconnect" href="//busuanzi.ibruce.info"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="高并发解决方案（1）：扩容&amp;缓存"><meta name="twitter:description" content="高并发解决方案（1）：扩容&amp;缓存"><meta name="twitter:image" content="https://machine4869.gitee.io/img/default_p4.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="高并发解决方案（1）：扩容&amp;缓存"><meta property="og:url" content="https://machine4869.gitee.io/2018/10/31/20181031100154042/"><meta property="og:site_name" content="哑舍"><meta property="og:description" content="高并发解决方案（1）：扩容&amp;缓存"><meta property="og:image" content="https://machine4869.gitee.io/img/default_p4.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>const autoChangeMode = 'false'
+var t = Cookies.get("theme");
+if (autoChangeMode == '1'){
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+const isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+if (t === undefined){
+  if (isLightMode) activateLightMode()
+  else if (isDarkMode) activateDarkMode()
+  else if (isNotSpecified || hasNoSupport){
+    console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+    now = new Date();
+    hour = now.getHours();
+    isNight = hour < 6 || hour >= 18
+    isNight ? activateDarkMode() : activateLightMode()
+}
+} else if (t == 'light') activateLightMode()
+else activateDarkMode()
+
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="canonical" href="https://machine4869.gitee.io/2018/10/31/20181031100154042/"><link rel="prev" title="高并发解决方案（2）：消息队列&amp;应用拆分" href="https://machine4869.gitee.io/2018/11/03/20181103212110299/"><link rel="next" title="并发编程与线程安全（6）：线程池 Executor&amp;并发拓展" href="https://machine4869.gitee.io/2018/10/30/20181030111752438/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://machine4869.gitee.io/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: 'Snackbar.bookmark.title',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"title":"Snackbar.bookmark.title","message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#2d3035","position":"bottom-left"},
+  baiduPush: false,
+  isHome: false,
+  isPost: true
+  
+}</script><meta name="generator" content="Hexo 4.2.0"></head><body><header> <div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">哑舍</a></span><span class="toggle-menu pull_right close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></span><span class="pull_right" id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></span></div></header><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">134</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">27</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">45</div></a></div></div></div><hr><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></div><div id="mobile-sidebar-toc"><div class="toc_mobile_headline">目录</div><div class="sidebar-toc__content"><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#第11章-扩容思路"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">第11章 扩容思路</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#为什么要扩容"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">为什么要扩容</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#两种方式"><span class="toc_mobile_items-number">1.2.</span> <span class="toc_mobile_items-text">两种方式</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#扩容-数据库"><span class="toc_mobile_items-number">1.3.</span> <span class="toc_mobile_items-text">扩容-数据库</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#第12章-缓存思路"><span class="toc_mobile_items-number">2.</span> <span class="toc_mobile_items-text">第12章 缓存思路</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#12-1-特征、场景及组件介绍"><span class="toc_mobile_items-number">2.1.</span> <span class="toc_mobile_items-text">12-1 特征、场景及组件介绍</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#特征"><span class="toc_mobile_items-number">2.1.1.</span> <span class="toc_mobile_items-text">特征</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#影响缓存命中率的因素"><span class="toc_mobile_items-number">2.1.2.</span> <span class="toc_mobile_items-text">影响缓存命中率的因素</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#缓存分类"><span class="toc_mobile_items-number">2.1.3.</span> <span class="toc_mobile_items-text">缓存分类</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#缓存组件介绍"><span class="toc_mobile_items-number">2.1.4.</span> <span class="toc_mobile_items-text">缓存组件介绍</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#12-2-redis的使用"><span class="toc_mobile_items-number">2.2.</span> <span class="toc_mobile_items-text">12-2 redis的使用</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#12-3-高并发场景问题及实战"><span class="toc_mobile_items-number">2.3.</span> <span class="toc_mobile_items-text">12-3 高并发场景问题及实战</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#高并发场景常见问题"><span class="toc_mobile_items-number">2.3.1.</span> <span class="toc_mobile_items-text">高并发场景常见问题</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#高并发缓存应用案例-股票分时线"><span class="toc_mobile_items-number">2.3.2.</span> <span class="toc_mobile_items-text">高并发缓存应用案例-股票分时线</span></a></li></ol></li></ol></li></ol></div></div></div><div id="body-wrap"><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true">     </i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#第11章-扩容思路"><span class="toc-number">1.</span> <span class="toc-text">第11章 扩容思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么要扩容"><span class="toc-number">1.1.</span> <span class="toc-text">为什么要扩容</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两种方式"><span class="toc-number">1.2.</span> <span class="toc-text">两种方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扩容-数据库"><span class="toc-number">1.3.</span> <span class="toc-text">扩容-数据库</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#第12章-缓存思路"><span class="toc-number">2.</span> <span class="toc-text">第12章 缓存思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#12-1-特征、场景及组件介绍"><span class="toc-number">2.1.</span> <span class="toc-text">12-1 特征、场景及组件介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#特征"><span class="toc-number">2.1.1.</span> <span class="toc-text">特征</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#影响缓存命中率的因素"><span class="toc-number">2.1.2.</span> <span class="toc-text">影响缓存命中率的因素</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存分类"><span class="toc-number">2.1.3.</span> <span class="toc-text">缓存分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存组件介绍"><span class="toc-number">2.1.4.</span> <span class="toc-text">缓存组件介绍</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-2-redis的使用"><span class="toc-number">2.2.</span> <span class="toc-text">12-2 redis的使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-3-高并发场景问题及实战"><span class="toc-number">2.3.</span> <span class="toc-text">12-3 高并发场景问题及实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#高并发场景常见问题"><span class="toc-number">2.3.1.</span> <span class="toc-text">高并发场景常见问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#高并发缓存应用案例-股票分时线"><span class="toc-number">2.3.2.</span> <span class="toc-text">高并发缓存应用案例-股票分时线</span></a></li></ol></li></ol></li></ol></div></div></div><main id="content-outer"><div id="top-container" style="background-image: url(/img/default_p4.jpeg)"><div id="post-info"><div id="post-title"><div class="posttitle">高并发解决方案（1）：扩容&amp;缓存</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 发表于 2018-10-31<span class="post-meta__separator">|</span><i class="fa fa-history fa-fw" aria-hidden="true"></i> 更新于 2019-11-28</time><span class="post-meta__separator">|</span><span><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">Java并发编程与高并发解决方案</a></span><div class="post-meta-wordcount"><i class="fa fa-file-word-o post-meta__icon fa-fw" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">4.8k</span><span class="post-meta__separator">|</span><i class="fa fa-clock-o post-meta__icon fa-fw" aria-hidden="true"></i><span>阅读时长: 15 分钟</span><div class="post-meta-pv-cv"><span class="post-meta__separator">|</span><span><i class="fa fa-eye post-meta__icon fa-fw" aria-hidden="true"> </i>阅读量:</span><span id="busuanzi_value_page_pv"></span><span class="post-meta__separator">|</span><i class="fa fa-comments-o post-meta__icon fa-fw" aria-hidden="true"></i><span>评论数:</span><a href="/2018/10/31/20181031100154042/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2018/10/31/20181031100154042/" itemprop="commentCount"></span></a></div></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><p>[TOC]</p>
+<h1 id="第11章-扩容思路"><a href="#第11章-扩容思路" class="headerlink" title="第11章 扩容思路"></a>第11章 扩容思路</h1><h2 id="为什么要扩容"><a href="#为什么要扩容" class="headerlink" title="为什么要扩容"></a>为什么要扩容</h2><p> 每个线程都有自己的工作内存, 占用内存大小取决于工作内存里变量的多少与大小 , 单个线程占用内存通常不会很大</p>
+<p>但是随着并发的线程不断的增加 , 从成百上千, 甚至几十万 , 占用的内存就会越来越多.这时候可能就要考虑给系统扩容了 , 简单点的 升级内存, 复杂点的 , 增加服务器 , 分担压力.</p>
+<h2 id="两种方式"><a href="#两种方式" class="headerlink" title="两种方式"></a>两种方式</h2><ul>
+<li>垂直扩容：提高系统部件能力。但会增大单个服务中其他软件设施的依赖与管理、服务内部复杂度</li>
+<li>水平扩容：增加更多系统成员。但会增加网络、数据库IO开销、管理多个服务器的难度</li>
+</ul>
+<h2 id="扩容-数据库"><a href="#扩容-数据库" class="headerlink" title="扩容-数据库"></a>扩容-数据库</h2><ul>
+<li>读操作扩展：假如网站是读操作比较多，比如博客这类。通过通过关系型数据库进行垂直扩展是个不错的选择，并且结合<strong>memcathe、redis、CDN等构建一个健壮的缓存系统</strong>。如果系统超负荷运行，将更多的数据放在缓存中来缓解系统的读压力。采用水平扩容没有太大的意义，因为性能的瓶颈不在写操作，所以不需要实时去完成，用更多的服务器来分担压力性价比太低。所以针对单个系统去强化它的读性能就可以了</li>
+<li>写操作扩展：假如写操作比较多，比如大型网站的交易系统，可考虑可<strong>水平扩展的数据存储方式，比如Cassandra、Hbase等</strong>。和大多数的关系型数据库不同，这种数据存储会随着增长增加更多的节点。也可以考虑垂直扩容提升单个数据库的性能，但会发现<strong>资金与硬盘的IO能力是有限的</strong>，所以需要增加更多数据库来分担写的压力。</li>
+</ul>
+<h1 id="第12章-缓存思路"><a href="#第12章-缓存思路" class="headerlink" title="第12章 缓存思路"></a>第12章 缓存思路</h1><h2 id="12-1-特征、场景及组件介绍"><a href="#12-1-特征、场景及组件介绍" class="headerlink" title="12-1 特征、场景及组件介绍"></a>12-1 特征、场景及组件介绍</h2><p>应用需要支撑大量并发量，但数据库的性能有限，所以使用缓存来减少数据库压力与提高访问性能。</p>
+<p>![屏幕快照 2018-10-31 上午11.04.47](20181031100154042/屏幕快照 2018-10-31 上午11.04.47.png) </p>
+<p>缓存的使用可以出现在1到4的各个环节中，每个环节的方案他们都各有特点。</p>
+<h3 id="特征"><a href="#特征" class="headerlink" title="特征"></a><strong>特征</strong></h3><ul>
+<li><p>命中率 = 命中数 / （命中数 + 没有命中数）</p>
+</li>
+<li><p>最大空间：缓存最大空间一旦缓存中元素数量超过这个值（或者缓存数据所占空间超过其最大支持空间），那么将会触发缓存启动清空策略根据不同的场景合理的设置最大元素值往往可以一定程度上提高缓存的命中率，从而更有效的时候缓存。</p>
+</li>
+<li><p>清空策略：FIFO/LFU/LRU/过期时间/随机</p>
+<p>FIFO：最先进入缓存的数据，在缓存空间不足时被清除，为了保证最新数据可用，保证实时性</p>
+<p>LFU(Least Frequently Used)：最近最不常用，基于访问次数，去除命中次数最少的元素，保证高频数据有效性</p>
+<p>LRU(Least Recently Used)：最近最少使用，基于访问时间，在被访问过的元素中去除最久未使用的元素，保证热点数据的有效性</p>
+</li>
+</ul>
+<h3 id="影响缓存命中率的因素"><a href="#影响缓存命中率的因素" class="headerlink" title="影响缓存命中率的因素"></a><strong>影响缓存命中率的因素</strong></h3><ol>
+<li><p>业务场景和业务需求</p>
+<p>缓存通常适合读多写少的业务场景，反之的使用意义并不多，命中率会很低。业务需求也决定了实时性的要求，直接影响到过期时间和更新策略，实时性要求越低越适合缓存。</p>
+</li>
+<li><p>缓存的设计（策略和粒度）</p>
+<p>通常情况下缓存的粒度越小，命中率越高。比如说缓存一个用户信息的对象，只有当这个用户的信息发生变化的时候才更新缓存，而如果是缓存一个集合的话，集合中任何一个对象发生变化都要重新更新缓存。</p>
+<p>当数据发生变化时，直接更新缓存的值比移除缓存或者让缓存过期它的命中率更高，不过这个时候系统的复杂度过高。</p>
+</li>
+<li><p>缓存的容量和基础设施</p>
+<p>缓存的容量有限就会容易引起缓存的失效和被淘汰。目前多数的缓存框架和中间件都采用LRU这个算法。同时采用缓存的技术选型也是至关重要的，比如采用本地内置的应用缓存，就比较容易出现单机瓶颈。而采用分布式缓存就更加容易扩展。所以需要做好系统容量规划，系统是否可扩展。</p>
+<p>​</p>
+</li>
+</ol>
+<h3 id="缓存分类"><a href="#缓存分类" class="headerlink" title="缓存分类"></a><strong>缓存分类</strong></h3><p><strong>根据缓存和应用的耦合度</strong>：</p>
+<ul>
+<li><p>本地缓存：编程实现（成员变量、局部变量、静态变量）、Guava Cache</p>
+<p>本地缓存最大的<strong>优点</strong>在于它在应用进程的内部，请求缓存非常的快速，没有过多的网络开销。在单应用中不需要集群支持，集群的情况下各节点不需要互相通知的情况下使用本地缓存比较合适。</p>
+<p><strong>缺点</strong>是因为本地缓存跟应用程序耦合，多个应用程序无法直接共享缓存，各应用节点都需要维护自己单独的缓存，有时也是对内存的一种浪费。</p>
+</li>
+<li><p>分布式缓存：Memcache、Redis</p>
+<p>分布式缓存指的是应用分离的缓存服务，最大的优点就是自身就是一个独立的应用，与本地应用是隔离的，多个应用直接共享缓存。</p>
+</li>
+</ul>
+<p><strong>根据缓存介质</strong></p>
+<p>虽然从硬件介质上来看，无非就是内存和硬盘两种，但从技术上，可以分成内存、硬盘文件、数据库。</p>
+<ul>
+<li><strong>内存：</strong>将缓存存储于内存中是最快的选择，无需额外的I/O开销，但是内存的缺点是没有持久化落地物理磁盘，一旦应用异常break down而重新启动，数据很难或者无法复原。</li>
+<li><strong>硬盘：</strong>一般来说，很多缓存框架会结合使用内存和硬盘，在内存分配空间满了或是在异常的情况下，可以被动或主动的将内存空间数据持久化到硬盘中，达到释放空间或备份数据的目的。</li>
+<li><strong>数据库：</strong>前面有提到，增加缓存的策略的目的之一就是为了减少数据库的I/O压力。现在使用数据库做缓存介质是不是又回到了老问题上了？其实，数据库也有很多种类型，像那些不支持SQL，只是简单的key-value存储结构的特殊数据库（如BerkeleyDB和Redis），响应速度和吞吐量都远远高于我们常用的关系型数据库等。</li>
+</ul>
+<h3 id="缓存组件介绍"><a href="#缓存组件介绍" class="headerlink" title="缓存组件介绍"></a><strong>缓存组件介绍</strong></h3><p><strong>本地缓存Guava Cache</strong></p>
+<p>Guava Cache是Google开源的Java重用工具集库Guava里的一款缓存工具，它的设计灵感是CuncurentHashMap</p>
+<p>![屏幕快照 2018-11-01 下午6.55.09](20181031100154042/屏幕快照 2018-11-01 下午6.55.09.png) </p>
+<p>Guava Cache继承了ConcurrentHashMap的思路，使用多个segments方式的细粒度锁，在保证线程安全的同时，支持高并发场景需求。Cache类似于Map，它是存储键值对的集合，不同的是它还需要处理evict、expire、dynamic load等算法逻辑，需要一些额外信息来实现这些操作。对此，根据面向对象思想，需要做方法与数据的关联封装. </p>
+<p>其主要实现的缓存功能有：</p>
+<ul>
+<li>自动将entry节点加载进缓存结构中；</li>
+<li>当缓存的数据超过设置的最大值时，使用LRU算法移除；</li>
+<li>具备根据entry节点上次被访问或者写入时间计算它的过期机制；</li>
+<li>缓存的key被封装在WeakReference引用内；</li>
+<li>缓存的Value被封装在WeakReference或SoftReference引用内；</li>
+<li>统计缓存使用过程中命中率、异常率、未命中率等统计数据。</li>
+</ul>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.machine.concurrency.example.cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.google.common.cache.CacheBuilder;</span><br><span class="line"><span class="keyword">import</span> com.google.common.cache.CacheLoader;</span><br><span class="line"><span class="keyword">import</span> com.google.common.cache.LoadingCache;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GuavaCacheExample1</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        LoadingCache&lt;String, Integer&gt; cache = CacheBuilder.newBuilder()</span><br><span class="line">                .maximumSize(<span class="number">10</span>) <span class="comment">// 最多存放10个数据</span></span><br><span class="line">                .expireAfterWrite(<span class="number">10</span>, TimeUnit.SECONDS) <span class="comment">// 缓存10秒</span></span><br><span class="line">                .recordStats() <span class="comment">// 开启记录状态数据功能</span></span><br><span class="line">                .build(<span class="keyword">new</span> CacheLoader&lt;String, Integer&gt;() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="function"><span class="keyword">public</span> Integer <span class="title">load</span><span class="params">(String key)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">        log.info(<span class="string">"&#123;&#125;"</span>, cache.getIfPresent(<span class="string">"key1"</span>)); <span class="comment">// null</span></span><br><span class="line">        cache.put(<span class="string">"key1"</span>, <span class="number">1</span>);</span><br><span class="line">        log.info(<span class="string">"&#123;&#125;"</span>, cache.getIfPresent(<span class="string">"key1"</span>)); <span class="comment">// 1</span></span><br><span class="line">        cache.invalidate(<span class="string">"key1"</span>);</span><br><span class="line">        log.info(<span class="string">"&#123;&#125;"</span>, cache.getIfPresent(<span class="string">"key1"</span>)); <span class="comment">// null</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.get(<span class="string">"key2"</span>)); <span class="comment">// -1</span></span><br><span class="line">            cache.put(<span class="string">"key2"</span>, <span class="number">2</span>);</span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.get(<span class="string">"key2"</span>)); <span class="comment">// 2</span></span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.size()); <span class="comment">// 1</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">3</span>; i &lt; <span class="number">13</span>; i++) &#123;</span><br><span class="line">                cache.put(<span class="string">"key"</span> + i, i);</span><br><span class="line">            &#125;</span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.size()); <span class="comment">// 10</span></span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.getIfPresent(<span class="string">"key2"</span>)); <span class="comment">// null</span></span><br><span class="line"></span><br><span class="line">            Thread.sleep(<span class="number">11000</span>);</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">"&#123;&#125;"</span>, cache.get(<span class="string">"key5"</span>)); <span class="comment">// -1</span></span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">"&#123;&#125;,&#123;&#125;"</span>, cache.stats().hitCount(), cache.stats().missCount());</span><br><span class="line"></span><br><span class="line">            log.info(<span class="string">"&#123;&#125;,&#123;&#125;"</span>, cache.stats().hitRate(), cache.stats().missRate());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            log.error(<span class="string">"cache exception"</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+
+
+
+
+<p><strong>Memcache</strong></p>
+<p>memcached是应用较广的开源分布式缓存产品之一，它本身其实不提供分布式解决方案。在服务端，memcached集群环境实际就是一个个memcached服务器的堆积，环境搭建较为简单；cache的分布式主要是在客户端实现，通过<strong>客户端的路由处理来达到分布式解决方案的目的</strong>。客户端做路由的原理非常简单，应用服务器在每次存取某key的value时，通过某种算法把key映射到某台memcached服务器nodeA上，因此这个key所有操作都在nodeA上</p>
+<p>左： memcached客户端路由图</p>
+<p>右：memcached一致性hash示例图</p>
+<p>![屏幕快照 2018-11-01 下午7.03.24](20181031100154042/屏幕快照 2018-11-01 下午7.03.24.png) </p>
+<p> memcache客户端<strong>采用一致性hash算法</strong>作为路由策略，相对于一般hash（如简单取模）的算法，一致性hash算法除了计算key的hash值外，还会计算每个server对应的hash值，然后将这些hash值映射到一个有限的值域上（比如0~2^32）。通过寻找hash值大于hash(key)的最小server作为存储该key数据的目标server。如果找不到，则直接把具有最小hash值的server作为目标server。同时，一定程度上，<strong>解决了扩容问题，增加或删除单个节点，对于整个集群来说，不会有大的影响</strong>。最近版本，增加了虚拟节点的设计，进一步提升了可用性。</p>
+<blockquote>
+<p><a href="https://www.cnblogs.com/lpfuture/p/5796398.html" target="_blank" rel="noopener">一致性哈希算法原理</a></p>
+</blockquote>
+<p>memcache内存管理机制</p>
+<p>![屏幕快照 2018-11-01 下午7.09.51](20181031100154042/屏幕快照 2018-11-01 下午7.09.51.png) </p>
+<ul>
+<li>memcached是一个高效的分布式内存cache，了解memcached的内存管理机制，才能更好的掌握memcached，让我们可以针对我们数据特点进行调优，让其更好的为我所用。<strong>我们知道memcached仅支持基础的key-value键值对类型数据存储</strong>。在memcached内存结构中有两个非常重要的概念：slab和chunk。 </li>
+<li>每个page的默认大小是1M，trunk是真正存放数据的地方，memcache会根据value值的大小找到接近大小的slab</li>
+</ul>
+<p><strong>Redis</strong></p>
+<p>Redis是一个远程内存数据库（非关系型数据库），性能强劲，具有复制特性以及解决问题而生的独一无二的数据模型。它可以存储键值对与5种不同类型的值之间的映射，可以将存储在内存的键值对数据持久化到硬盘，可以使用复制特性来扩展读性能，还可以使用客户端分片来扩展写性能。</p>
+<p>![屏幕快照 2018-11-01 下午7.46.18](20181031100154042/屏幕快照 2018-11-01 下午7.46.18.png) </p>
+<p>Redis具备以下特点：</p>
+<ul>
+<li>异常快速: Redis数据库完全在<em>内存</em>中，因此处理速度非常快，每秒能执行约11万集合，每秒约81000+条记录。</li>
+<li>数据持久化： redis支持数据持久化，可以将内存中的数据存储到磁盘上，方便在宕机等突发情况下快速恢复。</li>
+<li>支持丰富的数据类型: 相比许多其他的键值对存储数据库，Redis拥有一套较为丰富的数据类型。</li>
+<li>数据一致性： 所有Redis操作是原子的，这保证了如果两个客户端同时访问的Redis服务器将获得更新后的值。</li>
+<li>多功能实用工具： Redis是一个多实用的工具，可以在多个用例如缓存，消息，队列使用(Redis原生支持发布/订阅)，任何短暂的数据，应用程序，如 Web应用程序会话，网页命中计数等。</li>
+</ul>
+<p>适用场景：</p>
+<ol>
+<li><p>取最新N个数据的操作</p>
+</li>
+<li><p>排行榜类似的应用</p>
+</li>
+<li><p>精准设定过期时间的应用</p>
+</li>
+<li><p>计数器的应用</p>
+</li>
+<li><p>唯一性检查</p>
+</li>
+<li><p>实时系统，队列系统，最基础的缓存功能</p>
+<p>​</p>
+</li>
+</ol>
+<h2 id="12-2-redis的使用"><a href="#12-2-redis的使用" class="headerlink" title="12-2 redis的使用"></a>12-2 redis的使用</h2><p>参考我的文章：</p>
+<p><a href="https://machine4869.gitee.io/blog/2018/06/04/15326723152601/">redis学习笔记</a>     <a href="https://machine4869.gitee.io/blog/2018/07/20/15328488619832/">bootdo已实现(1)</a></p>
+<h2 id="12-3-高并发场景问题及实战"><a href="#12-3-高并发场景问题及实战" class="headerlink" title="12-3 高并发场景问题及实战"></a>12-3 高并发场景问题及实战</h2><h3 id="高并发场景常见问题"><a href="#高并发场景常见问题" class="headerlink" title="高并发场景常见问题"></a>高并发场景常见问题</h3><ul>
+<li>缓存一致性</li>
+<li>缓存并发问题</li>
+<li>缓存穿透问题</li>
+<li>缓存的雪崩现象</li>
+</ul>
+<p>1、缓存一致性问题</p>
+<p>当数据时效性要求很高时，<strong>需要保证缓存中的数据与数据库中的保持一致</strong>，而且需要保证缓存节点和副本中的数据也保持一致，不能出现差异现象。这就比较依赖缓存的过期和更新策略。一般会在数据发生更改的时，主动更新缓存中的数据或者移除对应的缓存。</p>
+<p>包含4种情况：</p>
+<p>![屏幕快照 2018-11-01 下午10.10.06](20181031100154042/屏幕快照 2018-11-01 下午10.10.06.png) </p>
+<p>2、缓存并发问题</p>
+<p>缓存过期后将尝试从后端数据库获取数据，这是一个看似合理的流程。但是，在高并发场景下，有可能多个请求并发的去从数据库获取数据，对后端数据库造成极大的冲击，甚至<strong>导致 “雪崩”现象</strong>。此外，当某个缓存key在被更新时，同时也可能被大量请求在获取，这也会导致一致性的问题。那如何避免类似问题呢？我们会想到<strong>类似“锁”的机制</strong>，在缓存更新或者过期的情况下，先尝试获取到锁，当更新或者从数据库获取完成后再释放锁，其他的请求只需要牺牲一定的等待时间，即可直接从缓存中继续获取数据。</p>
+<p>![屏幕快照 2018-11-01 下午10.13.51](20181031100154042/屏幕快照 2018-11-01 下午10.13.51.png) </p>
+<p>3、缓存穿透问题</p>
+<p>真正的缓存穿透应该是这样的：</p>
+<p>在高并发场景下，如果某一个<strong>key被高并发访问，没有被命中</strong>，出于对容错性考虑，会尝试去从后端数据库中获取，从而导致了大量请求达到数据库，而当该key对应的数据本身就是空的情况下（查询null时没有缓存），这就导致<strong>数据库中并发的去执行了很多不必要的查询操作</strong>，从而导致巨大冲击和压力。</p>
+<p>![屏幕快照 2018-11-01 下午10.19.34](20181031100154042/屏幕快照 2018-11-01 下午10.19.34.png) </p>
+<p>可以通过下面的几种常用方式来<strong>避免缓存传统问题</strong>：</p>
+<ul>
+<li><p>缓存空对象</p>
+<p>对查询结果为空的对象也进行缓存，如果是集合，可以缓存一个空的集合（非null），如果是缓存单个对象，可以通过字段标识来区分。这样避免请求穿透到后端数据库。同时，也需要保证缓存数据的时效性。这种方式实现起来成本较低，比较适合命中不高，但可能被频繁更新的数据。</p>
+</li>
+<li><p>单独过滤处理</p>
+<p>对所有可能对应数据为空的key进行统一的存放，并在请求前做拦截，这样避免请求穿透到后端数据库。这种方式实现起来相对复杂，比较适合命中不高，但是更新不频繁的数据。</p>
+</li>
+</ul>
+<p>4、缓存颠簸问题</p>
+<p>缓存的颠簸问题，有些地方可能被成为“缓存抖动”，可以看做是一种比“雪崩”更轻微的故障，但是也会在一段时间内对系统造成冲击和性能影响。一般是<strong>由于缓存节点故障导致</strong>。业内推荐的做法是通过一致性Hash算法来解决。这里不做过多阐述。</p>
+<p>5、缓存的雪崩现象</p>
+<p>缓存雪崩就是指由于缓存的原因，导致<strong>大量请求到达后端数据库</strong>，从而导致数据库崩溃，整个系统崩溃，发生灾难。导致这种现象的原因有很多种，上面提到的“缓存并发”，“缓存穿透”，“缓存颠簸”等问题，其实都可能会导致缓存雪崩现象发生。这些问题也可能会被恶意攻击者所利用。还有一种情况，例如某个时间点内，系统预加载的<strong>缓存周期性集中失效</strong>了，也可能会导致雪崩。为了避免这种周期性失效，可以通过设置不同的过期时间，来错开缓存过期，从而避免缓存集中失效。</p>
+<p>![屏幕快照 2018-11-01 下午10.30.16](20181031100154042/屏幕快照 2018-11-01 下午10.30.16.png) </p>
+<p>从应用架构角度，我们可以通过<strong>限流、降级、熔断</strong>等手段来降低影响，也可以通过<strong>多级缓存</strong>来避免这种灾难。</p>
+<p>此外，从整个研发体系流程的角度，应该加强<strong>压力测试</strong>，尽量模拟真实场景，尽早的暴露问题从而防范。</p>
+<h3 id="高并发缓存应用案例-股票分时线"><a href="#高并发缓存应用案例-股票分时线" class="headerlink" title="高并发缓存应用案例-股票分时线"></a>高并发缓存应用案例-股票分时线</h3><p>![屏幕快照 2018-11-01 下午10.37.55](20181031100154042/屏幕快照 2018-11-01 下午10.37.55.png) </p>
+<ul>
+<li>利用guava cache缓存最近几分钟内所有股票的分时数据，key是时间点（单位到分钟），一分钟内有多次变动时使用最后的数据覆盖，保证每只股票每分钟只缓存一条数据</li>
+<li>启动一个定时任务，每分钟将最近几分钟的数据都写到redis里，保证redis里的数据一直是最新的。保存使用的是redis hash结构，key是时间点。用户访问分时线时只需从redis取出当前股票缓存数据。</li>
+<li>…</li>
+</ul>
+<blockquote>
+<p>参考：<a href="https://www.imooc.com/article/20918" target="_blank" rel="noopener">Redis在股票分时K线图计算的实践</a></p>
+</blockquote>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Machine</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://machine4869.gitee.io/2018/10/31/20181031100154042/">https://machine4869.gitee.io/2018/10/31/20181031100154042/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://machine4869.gitee.io">哑舍</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">Java并发编程与高并发解决方案    </a></div><div class="post_share"><div class="social-share" data-image="/img/default_p4.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.png" alt="微信"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付宝"><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2018/11/03/20181103212110299/"><img class="prev_cover lazyload" data-src="/img/default_p8.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>高并发解决方案（2）：消息队列&amp;应用拆分</span></div></a></div><div class="next-post pull_right"><a href="/2018/10/30/20181030111752438/"><img class="next_cover lazyload" data-src="/img/default_p6.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>并发编程与线程安全（6）：线程池 Executor&amp;并发拓展</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2018/11/05/20181105165724309/" title="高并发解决方案（4）：数据库切库分库分表&高可用"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-11-05</div><div class="relatedPosts_title">高并发解决方案（4）：数据库切库分库分表&高可用</div></div></a></div><div class="relatedPosts_item"><a href="/2018/11/05/20181105104407665/" title="高并发解决方案（3）：应用限流&服务降级与服务熔断"><img class="relatedPosts_cover lazyload"data-src="/img/default_p3.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-11-05</div><div class="relatedPosts_title">高并发解决方案（3）：应用限流&服务降级与服务熔断</div></div></a></div><div class="relatedPosts_item"><a href="/2018/11/03/20181103212110299/" title="高并发解决方案（2）：消息队列&应用拆分"><img class="relatedPosts_cover lazyload"data-src="/img/default_p8.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-11-03</div><div class="relatedPosts_title">高并发解决方案（2）：消息队列&应用拆分</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/30/20181030111752438/" title="并发编程与线程安全（6）：线程池 Executor&并发拓展"><img class="relatedPosts_cover lazyload"data-src="/img/default_p6.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-30</div><div class="relatedPosts_title">并发编程与线程安全（6）：线程池 Executor&并发拓展</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/29/20181029185403603/" title="并发编程与线程安全（5）：J.U.C组件拓展"><img class="relatedPosts_cover lazyload"data-src="/img/default_p2.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-29</div><div class="relatedPosts_title">并发编程与线程安全（5）：J.U.C组件拓展</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/27/20181027234153307/" title="并发编程与线程安全（4）：J.U.C之AQS"><img class="relatedPosts_cover lazyload"data-src="/img/default_p2.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-27</div><div class="relatedPosts_title">并发编程与线程安全（4）：J.U.C之AQS</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script><script>var notify = true == true ? true : false;
+var verify = false == true ? true : false;
+var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify:notify,
+  verify:verify,
+  appId:'yPVvDIaWlODDhs0bbECwLIIp-gzGzoHsz',
+  appKey:'VyOIa40LxnjURzW1HUCiwTpV',
+  placeholder:'记得留下你的昵称及邮箱，以便收到答复~',
+  avatar:'monsterid',
+  guest_info:guest_info,
+  pageSize:'10',
+  lang:'zh-cn',
+  recordIP: true
+});</script></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2020 By Machine</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://machine4869.gitee.io/">blog</a>!</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">简</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script id="canvas_nest" color="215,215,215" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

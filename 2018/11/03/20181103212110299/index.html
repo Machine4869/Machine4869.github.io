@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>高并发解决方案（2）：消息队列&amp;应用拆分 | 哑舍</title><meta name="description" content="高并发解决方案（2）：消息队列&amp;应用拆分"><meta name="keywords" content="Java并发编程与高并发解决方案"><meta name="author" content="Machine"><meta name="copyright" content="Machine"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/cat2.ico"><link rel="preconnect" href="//cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link rel="preconnect" href="//busuanzi.ibruce.info"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="高并发解决方案（2）：消息队列&amp;应用拆分"><meta name="twitter:description" content="高并发解决方案（2）：消息队列&amp;应用拆分"><meta name="twitter:image" content="https://machine4869.gitee.io/img/default_p8.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="高并发解决方案（2）：消息队列&amp;应用拆分"><meta property="og:url" content="https://machine4869.gitee.io/2018/11/03/20181103212110299/"><meta property="og:site_name" content="哑舍"><meta property="og:description" content="高并发解决方案（2）：消息队列&amp;应用拆分"><meta property="og:image" content="https://machine4869.gitee.io/img/default_p8.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>const autoChangeMode = 'false'
+var t = Cookies.get("theme");
+if (autoChangeMode == '1'){
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+const isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+if (t === undefined){
+  if (isLightMode) activateLightMode()
+  else if (isDarkMode) activateDarkMode()
+  else if (isNotSpecified || hasNoSupport){
+    console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+    now = new Date();
+    hour = now.getHours();
+    isNight = hour < 6 || hour >= 18
+    isNight ? activateDarkMode() : activateLightMode()
+}
+} else if (t == 'light') activateLightMode()
+else activateDarkMode()
+
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="canonical" href="https://machine4869.gitee.io/2018/11/03/20181103212110299/"><link rel="prev" title="高并发解决方案（3）：应用限流&amp;服务降级与服务熔断" href="https://machine4869.gitee.io/2018/11/05/20181105104407665/"><link rel="next" title="高并发解决方案（1）：扩容&amp;缓存" href="https://machine4869.gitee.io/2018/10/31/20181031100154042/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://machine4869.gitee.io/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: 'Snackbar.bookmark.title',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"title":"Snackbar.bookmark.title","message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#2d3035","position":"bottom-left"},
+  baiduPush: false,
+  isHome: false,
+  isPost: true
+  
+}</script><meta name="generator" content="Hexo 4.2.0"></head><body><header> <div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">哑舍</a></span><span class="toggle-menu pull_right close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></span><span class="pull_right" id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></span></div></header><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">134</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">27</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">45</div></a></div></div></div><hr><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></div><div id="mobile-sidebar-toc"><div class="toc_mobile_headline">目录</div><div class="sidebar-toc__content"><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#第13章-消息队列思路"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">第13章 消息队列思路</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#引入消息队列"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">引入消息队列</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#消息队列特性"><span class="toc_mobile_items-number">1.2.</span> <span class="toc_mobile_items-text">消息队列特性</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#为什么需要消息队列"><span class="toc_mobile_items-number">1.3.</span> <span class="toc_mobile_items-text">为什么需要消息队列</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#消息队列的好处"><span class="toc_mobile_items-number">1.4.</span> <span class="toc_mobile_items-text">消息队列的好处</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#消息队列举例"><span class="toc_mobile_items-number">1.5.</span> <span class="toc_mobile_items-text">消息队列举例</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#Kafka"><span class="toc_mobile_items-number">1.5.1.</span> <span class="toc_mobile_items-text">Kafka</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#RabbitMQ"><span class="toc_mobile_items-number">1.5.2.</span> <span class="toc_mobile_items-text">RabbitMQ</span></a></li></ol></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#第14章-应用拆分思路"><span class="toc_mobile_items-number">2.</span> <span class="toc_mobile_items-text">第14章 应用拆分思路</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#拆分的原则"><span class="toc_mobile_items-number">2.1.</span> <span class="toc_mobile_items-text">拆分的原则</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#拆分的思考"><span class="toc_mobile_items-number">2.2.</span> <span class="toc_mobile_items-text">拆分的思考</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#框架举例"><span class="toc_mobile_items-number">2.3.</span> <span class="toc_mobile_items-text">框架举例</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#Dubbo"><span class="toc_mobile_items-number">2.3.1.</span> <span class="toc_mobile_items-text">Dubbo</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#SpringCloud"><span class="toc_mobile_items-number">2.3.2.</span> <span class="toc_mobile_items-text">SpringCloud</span></a></li></ol></li></ol></li></ol></div></div></div><div id="body-wrap"><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true">     </i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#第13章-消息队列思路"><span class="toc-number">1.</span> <span class="toc-text">第13章 消息队列思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#引入消息队列"><span class="toc-number">1.1.</span> <span class="toc-text">引入消息队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息队列特性"><span class="toc-number">1.2.</span> <span class="toc-text">消息队列特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#为什么需要消息队列"><span class="toc-number">1.3.</span> <span class="toc-text">为什么需要消息队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息队列的好处"><span class="toc-number">1.4.</span> <span class="toc-text">消息队列的好处</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#消息队列举例"><span class="toc-number">1.5.</span> <span class="toc-text">消息队列举例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Kafka"><span class="toc-number">1.5.1.</span> <span class="toc-text">Kafka</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RabbitMQ"><span class="toc-number">1.5.2.</span> <span class="toc-text">RabbitMQ</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#第14章-应用拆分思路"><span class="toc-number">2.</span> <span class="toc-text">第14章 应用拆分思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#拆分的原则"><span class="toc-number">2.1.</span> <span class="toc-text">拆分的原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#拆分的思考"><span class="toc-number">2.2.</span> <span class="toc-text">拆分的思考</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#框架举例"><span class="toc-number">2.3.</span> <span class="toc-text">框架举例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Dubbo"><span class="toc-number">2.3.1.</span> <span class="toc-text">Dubbo</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SpringCloud"><span class="toc-number">2.3.2.</span> <span class="toc-text">SpringCloud</span></a></li></ol></li></ol></li></ol></div></div></div><main id="content-outer"><div id="top-container" style="background-image: url(/img/default_p8.jpeg)"><div id="post-info"><div id="post-title"><div class="posttitle">高并发解决方案（2）：消息队列&amp;应用拆分</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 发表于 2018-11-03<span class="post-meta__separator">|</span><i class="fa fa-history fa-fw" aria-hidden="true"></i> 更新于 2019-11-28</time><span class="post-meta__separator">|</span><span><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">Java并发编程与高并发解决方案</a></span><div class="post-meta-wordcount"><i class="fa fa-file-word-o post-meta__icon fa-fw" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">4k</span><span class="post-meta__separator">|</span><i class="fa fa-clock-o post-meta__icon fa-fw" aria-hidden="true"></i><span>阅读时长: 12 分钟</span><div class="post-meta-pv-cv"><span class="post-meta__separator">|</span><span><i class="fa fa-eye post-meta__icon fa-fw" aria-hidden="true"> </i>阅读量:</span><span id="busuanzi_value_page_pv"></span><span class="post-meta__separator">|</span><i class="fa fa-comments-o post-meta__icon fa-fw" aria-hidden="true"></i><span>评论数:</span><a href="/2018/11/03/20181103212110299/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2018/11/03/20181103212110299/" itemprop="commentCount"></span></a></div></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><p>[TOC]</p>
+<h1 id="第13章-消息队列思路"><a href="#第13章-消息队列思路" class="headerlink" title="第13章 消息队列思路"></a>第13章 消息队列思路</h1><p>消息队列已经逐渐成为企业IT<strong>系统内部通信的核心手段</strong>。它具有低耦合、可靠投递、广播、流量控制、最终一致性等一系列功能，成为异步RPC的主要手段之一。</p>
+<h2 id="引入消息队列"><a href="#引入消息队列" class="headerlink" title="引入消息队列"></a><strong>引入消息队列</strong></h2><p>![屏幕快照 2018-11-03 下午9.34.40](20181103212110299/屏幕快照 2018-11-03 下午9.34.40.png) </p>
+<ul>
+<li><strong>出现的问题</strong>：消息被处理的过程相当于流程A被处理。我们这里以一个实际的模型来讨论下，比如用户下单成功时给用户发短信，如果没有这个消息队列，我们会选择同步调用发短信的接口，并等待短息发送成功，这时候假设<strong>短信接口实现出现问题</strong>了，或者短信调用端超时了，又或者短信发送达到上限了，我们是选择重试几次还是放弃，还是选择把这个放到数据库。过一段时间再看看呢，不管怎样，实现都很复杂。</li>
+<li><strong>引入消息队列</strong>：我们可以将发短信这个请求放在消息队列里，消息队列按照一定的顺序挨个处理队列里的消息，当处理到发送短信的任务时，通知短信服务发送消息，如果出现之前出现的问题，那么把这个消息重新放到消息队列中。我们可以将发短信这个请求放在消息队列里，消息队列按照一定的顺序<strong>挨个处理队列里的消息</strong>，当处理到发送短信的任务时，通知短信服务发送消息，如果出现之前出现的问题，那么把这个消息重新放到消息队列中。</li>
+</ul>
+<h2 id="消息队列特性"><a href="#消息队列特性" class="headerlink" title="消息队列特性"></a><strong>消息队列特性</strong></h2><ul>
+<li>业务无关：只做消息分发</li>
+<li>FIFO：先投递先到达</li>
+<li>荣灾：结点的动态增删和消息的持久化</li>
+<li>性能：吞吐量提升，系统内部通信效率提高</li>
+</ul>
+<h2 id="为什么需要消息队列"><a href="#为什么需要消息队列" class="headerlink" title="为什么需要消息队列"></a><strong>为什么需要消息队列</strong></h2><ul>
+<li><p>【生产】和【消费】的速度或稳定性等因素不一致</p>
+<p>例如短信发送、 调用远程系统下订单、把用户请求搜集到队列里</p>
+<p>​</p>
+</li>
+</ul>
+<h2 id="消息队列的好处"><a href="#消息队列的好处" class="headerlink" title="消息队列的好处"></a><strong>消息队列的好处</strong></h2><ol>
+<li><p><strong>业务解耦</strong>。一个事务只关心本质的流程，需要依赖其他事情但是不那么重要的时候，有通知即可，无需等待结果。</p>
+<p> 短信发送时<strong>只要保证放到消息队列中就可以</strong>了，接着做后面的事情就行。每个成员不必受其他成员影响，可以更独立自主，只通过一个简单的容器来联系。</p>
+<p>对于我们的订单系统，订单最终支付成功之后可能需要给用户发送短信积分什么的，但其实这已经不是我们系统的核心流程了。如果外部系统速度偏慢（比如短信网关速度不好），那么主流程的时间会加长很多，用户肯定不希望点击支付过好几分钟才看到结果。那么我们只需要通知短信系统“我们支付成功了”，不一定非要等待它处理完成。</p>
+</li>
+<li><p><strong>最终一致性。</strong>通过在队列中存放任务保证<strong>它最终一定会执行</strong>。最终一致性指的是两个系统的状态保持一致，要么都成功，要么都失败。 当然有个时间限制，理论上越快越好，但实际上在各种异常的情况下，可能会有一定延迟达到最终一致状态，但最后两个系统的状态是一样的。 </p>
+<p>业界有一些为“最终一致性”而生的消息队列，如Notify（阿里）、QMQ（去哪儿）等，其设计初衷，就是为了交易系统中的高可靠通知。</p>
+<p>以一个银行的转账过程来理解最终一致性，转账的需求很简单，如果A系统扣钱成功，则B系统加钱一定成功。反之则一起回滚，像什么都没发生一样。<br>然而，这个过程中存在很多可能的意外：</p>
+<ol>
+<li>A扣钱成功，调用B加钱接口失败。</li>
+<li>A扣钱成功，调用B加钱接口虽然成功，但获取最终结果时网络异常引起超时。</li>
+<li>A扣钱成功，B加钱失败，A想回滚扣的钱，但A机器down机。</li>
+</ol>
+<p>可见，想把这件看似简单的事真正做成，真的不那么容易。所有跨JVM的一致性问题，从技术的角度讲通用的解决方案是：</p>
+<ol>
+<li><strong>强一致性</strong>，分布式事务，但<strong>落地太难且成本太高</strong>，后文会具体提到。</li>
+<li>最终一致性，主要是用“记录”和“补偿”的方式。在做所有的不确定的事情之前，<strong>先把事情记录下来</strong>，然后去做不确定的事情，结果可能是：成功、失败或是不确定，“不确定”（例如超时等）可以等价为失败。成功就可以把记录的东西清理掉了，<strong>对于失败和不确定，可以依靠定时任务等方式把所有失败的事情重新搞一遍，直到成功为止</strong>。<br>回到刚才的例子，系统在A扣钱成功的情况下，把要给B“通知”这件事记录在库里（为了保证最高的可靠性可以把通知B系统加钱和扣钱成功这两件事维护在一个本地事务里），通知成功则删除这条记录，通知失败或不确定则依靠定时任务<strong>补偿性地通知我们</strong>，直到我们把状态更新成正确的为止。</li>
+</ol>
+</li>
+<li><p><strong>广播</strong>。 </p>
+<p>消息队列的基本功能之一是进行广播。如果没有消息队列，每当一个新的业务方接入，我们都要联调一次新接口。有了消息队列，我们只需要关心消息是否送达了队列，至于谁希望订阅，是下游的事情，无疑极大地减少了开发和联调的工作量。</p>
+</li>
+<li><p><strong>提速</strong>。假设我们还需要发送邮件，有了消息队列就不需要同步等待，我们可以直接并行处理，而下单核心任务可以更快完成。增强业务系统的异步处理能力。甚至几乎不可能出现并发现象。</p>
+</li>
+<li><p><strong>削峰和流控</strong>。不对于不需要实时处理的请求来说，当并发量特别大的时候，可以先在消息队列中作缓存，然后陆续发送给对应的服务去处理。</p>
+<p><strong>上下游对于事情的处理能力是不同的</strong>。比如，Web前端每秒承受上千万的请求，并不是什么神奇的事情，只需要加多一点机器，再搭建一些LVS负载均衡设备和Nginx等即可。但数据库的处理能力却十分有限，即使使用SSD加分库分表，单机的处理能力仍然在万级。由于成本的考虑，我们不能奢求数据库的机器数量追上前端。</p>
+<p><strong>这种问题同样存在于系统和系统之间。</strong>如短信系统可能由于短板效应，速度卡在网关上（每秒几百次请求），跟前端的并发量不是一个数量级。但用户晚上个半分钟左右收到短信，一般是不会有太大问题的。如果没有消息队列，两个系统之间通过协商、滑动窗口等复杂的方案也不是说不能实现。但系统复杂性指数级增长，势必在上游或者下游做存储，并且要处理定时、拥塞等一系列问题。而且每当有处理能力有差距的时候，都需要单独开发一套逻辑来维护这套逻辑。所以，利用中间系统转储两个系统的通信内容，并在下游系统有能力处理这些消息的时候，再处理这些消息，是一套相对较通用的方式。</p>
+<p> 总而言之，消息队列不是万能的。对于<strong>需要强事务保证而且延迟敏感的，RPC是优于消息队列的</strong>。<br>对于一些无关痛痒，或者对于别人非常重要但是对于自己不是那么关心的事情，可以利用消息队列去做。<br>支持最终一致性的消息队列，能够用来处理延迟不那么敏感的“分布式事务”场景，而且相对于笨重的分布式事务，可能是更优的处理方式。<br>当上下游系统处理能力存在差距的时候，利用消息队列做一个<strong>通用的“漏斗”</strong>。在下游有能力处理的时候，再进行分发。<br>如果下游有很多系统关心你的系统发出的通知的时候，果断地使用消息队列吧。</p>
+</li>
+</ol>
+<h2 id="消息队列举例"><a href="#消息队列举例" class="headerlink" title="消息队列举例"></a><strong>消息队列举例</strong></h2><p>当今市面上有很多主流的消息中间件，如老牌的ActiveMQ、RabbitMQ，炙手可热的Kafka，阿里巴巴自主开发的Notify、MetaQ、RocketMQ等。</p>
+<h3 id="Kafka"><a href="#Kafka" class="headerlink" title="Kafka"></a><strong>Kafka</strong></h3><p>Kafka是一种高吞吐量的<strong>分布式发布订阅消息系统</strong>，它可以处理消费者规模的网站中的所有动作流数据。</p>
+<p>![屏幕快照 2018-11-03 下午10.21.24](20181103212110299/屏幕快照 2018-11-03 下午10.21.24.png) </p>
+<p>Kafka 有如下<strong>特性</strong>：</p>
+<ul>
+<li>以时间复杂度为O(1)的方式提供消息持久化能力，即使对TB级以上数据也能保证常数时间复杂度的访问性能。</li>
+<li>高吞吐率。即使在非常廉价的商用机器上也能做到单机支持每秒100K条以上消息的传输。</li>
+<li>支持Kafka Server间的消息分区，及分布式消费，同时保证每个Partition内的消息顺序传输。</li>
+<li>同时支持离线数据处理和实时数据处理。</li>
+<li>Scale out：支持在线水平扩展。 </li>
+</ul>
+<p>kafka的<strong>术语</strong></p>
+<ul>
+<li>Broker：Kafka集群包含一个或多个<strong>服务器</strong>，这种服务器被称为broker。</li>
+<li>Topic：每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。（物理上不同Topic的消息分开存储，逻辑上一个Topic的消息虽然保存于一个或多个broker上但用户只需指定消息的Topic即可生产或消费数据而不必关心数据存于何处）</li>
+<li>Partition：<strong>Partition是物理上的概念</strong>，每个Topic包含一个或多个Partition。</li>
+<li>Producer：负责发布消息到Kafka broker。</li>
+<li>Consumer：消息消费者，向Kafka broker读取消息的客户端。</li>
+<li>Consumer Group：每个Consumer属于一个特定的Consumer Group（可为每个Consumer指定group name，若不指定group name则属于默认的group）。</li>
+</ul>
+<blockquote>
+<p>kafka使用参考我的文章：<a href="https://machine4869.gitee.io/blog/2018/10/08/15390005252096/">Kafka流处理平台</a> </p>
+</blockquote>
+<h3 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a><strong>RabbitMQ</strong></h3><p>![屏幕快照 2018-11-03 下午10.30.51](20181103212110299/屏幕快照 2018-11-03 下午10.30.51.png) </p>
+<p>下面来介绍RabbitMQ里的一些基本定义，主要如下：<br><strong>RabbitMQ Server</strong>：提供消息一条从Producer到Consumer的处理。<br><strong>Exchange</strong>：一边从发布者方接收消息，一边把消息推送到队列。<br>producer只能将消息发送给exchange。而exchange负责将消息发送到queues。Procuder Publish的Message进入了exchange，exchange会根据routingKey处理接收到的消息，判断消息是应该推送到指定的队列还是是多个队列，或者是直接忽略消息。这些规则是通过交换机类型（exchange type）来定义的主要的type有direct,topic,headers,fanout。具体针对不同的场景使用不同的type。<br>queue也是通过这个routing keys来做的绑定。交换机将会对绑定键（binding key）和路由键（routing key）进行精确匹配，从而确定消息该分发到哪个队列。<br><strong>Queue</strong>：消息队列。接收来自exchange的消息，然后再由consumer取出。exchange和queue可以一对一，也可以一对多，它们的关系通过routingKey来绑定。<br><strong>Producer</strong>：Client A &amp; B,生产者，消息的来源,消息必须发送给exchange。而不是直接给queue<br><strong>Consumer</strong>：Client 1，2，3消费者，直接从queue中获取消息进行消费，而不是从exchange中获取消息进行消费。</p>
+<blockquote>
+<p>RabbitMQ的使用：略</p>
+</blockquote>
+<h1 id="第14章-应用拆分思路"><a href="#第14章-应用拆分思路" class="headerlink" title="第14章 应用拆分思路"></a>第14章 应用拆分思路</h1><p>前面我们已经提到单个服务器再优化，它的处理能力都是有上限的，因此我们选择多扩容以及使用缓存和消息队列等对程序进行优化。</p>
+<p>下面介绍另一种方法，随着项目需求完成越来越多，应用自然也会越来越大，架构师将一个应用整体拆分成多个应用。</p>
+<h2 id="拆分的原则"><a href="#拆分的原则" class="headerlink" title="拆分的原则"></a><strong>拆分的原则</strong></h2><ol>
+<li><p>业务优先，确定业务边界</p>
+</li>
+<li><p>循序渐进，边拆分边测试</p>
+</li>
+<li><p>兼顾技术：重构、分层</p>
+</li>
+<li><p>可靠测试</p>
+</li>
+</ol>
+<h2 id="拆分的思考"><a href="#拆分的思考" class="headerlink" title="拆分的思考"></a><strong>拆分的思考</strong></h2><ol>
+<li><p>应用之间的通信：RPC（dubbo等）、消息队列</p>
+<p>消息传输适用于传输数据包小但是数据量大，对实时性要求不高的场景。比如下单成功后通过短信通知用户。而选用RPC框架实时性更高一些。<a href="https://blog.csdn.net/u013521220/article/details/70157956" target="_blank" rel="noopener">你应该知道的 RPC 原理</a></p>
+</li>
+<li><p>应用之间的数据库设计：每个应用都有独立的数据库</p>
+</li>
+<li><p>避免事务操作跨应用，分布式事务是一个非常消耗资源的问题。这样应用和应用的耦合度降低。</p>
+</li>
+</ol>
+<h2 id="框架举例"><a href="#框架举例" class="headerlink" title="框架举例"></a>框架举例</h2><p>服务化——Dubbo</p>
+<p>微服务——SpringCloud</p>
+<h3 id="Dubbo"><a href="#Dubbo" class="headerlink" title="Dubbo"></a>Dubbo</h3><p>Dubbo是一种分布式的服务框架 ![屏幕快照 2018-11-04 下午10.21.03](20181103212110299/屏幕快照 2018-11-04 下午10.21.03.png)</p>
+<h3 id="SpringCloud"><a href="#SpringCloud" class="headerlink" title="SpringCloud"></a>SpringCloud</h3><p>微服务</p>
+<p>![屏幕快照 2018-11-04 下午10.38.28](20181103212110299/屏幕快照 2018-11-04 下午10.38.28.png)</p>
+<p>![屏幕快照 2018-11-04 下午10.39.44](20181103212110299/屏幕快照 2018-11-04 下午10.39.44.png)</p>
+<p><strong>要实践微服务要解决4个问题</strong>：</p>
+<ol>
+<li><p>客户端如何访问这些服务</p>
+<p>API Gateway提供统一的服务入口，对前台透明，同时可以聚合后台的服务，提供安全过滤流控等api的管理功能</p>
+</li>
+<li><p>服务之间是如何通信的</p>
+<p>异步的话使用消息队列，同步调用使用REST或者是RPC，Rest可以使用springboot，RPC通常使用Dubbo</p>
+<p>同步调用一致性强但是出现调用问题，<strong>REST一般基于http实现</strong>，能够跨客户端，同时对客户端没有更多的要求。</p>
+<p><strong>RPC的传输协议更高效</strong>，安全也更加可控。特别是在一个<strong>公司内部</strong>如果有统一的开发规范和统一的框架，它的开发效率会更加明显。</p>
+<p>而异步消息在分布式系统中有特别广泛的应用，它既能减少调用服务之间的耦合，又能成为<strong>调用之间的缓冲</strong>，确保消息积压不会冲垮被调用方。同时保证调用方的用户的体验，继续干自己的活。付出的代价是一致性的减慢，需要接受数据的最终一致性。</p>
+</li>
+<li><p>如何实现如此多服务</p>
+<p>在微服务架构中一般每一服务都会<strong>拷贝进行负载均衡</strong>，服务如何相互感知，如何相互管理，这就是<strong>服务发现</strong>的问题了，一般都是进行服务注册信息的分布式管理。</p>
+</li>
+<li><p>服务挂了该如何解决，有什么备份方案和应急处理机制</p>
+<p>分布式最大的特性就是<strong>网络是不可靠</strong>的，当系统是由一系列的调用链组成的时候，其中任何一个出问题都不至于影响到整个链路。</p>
+<p>相应的手段有：重试机制、应用的限流、熔断机制、负载均衡、系统降级</p>
+</li>
+</ol>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Machine</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://machine4869.gitee.io/2018/11/03/20181103212110299/">https://machine4869.gitee.io/2018/11/03/20181103212110299/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://machine4869.gitee.io">哑舍</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%AB%98%E5%B9%B6%E5%8F%91%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">Java并发编程与高并发解决方案    </a></div><div class="post_share"><div class="social-share" data-image="/img/default_p8.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.png" alt="微信"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付宝"><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2018/11/05/20181105104407665/"><img class="prev_cover lazyload" data-src="/img/default_p3.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>高并发解决方案（3）：应用限流&amp;服务降级与服务熔断</span></div></a></div><div class="next-post pull_right"><a href="/2018/10/31/20181031100154042/"><img class="next_cover lazyload" data-src="/img/default_p4.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>高并发解决方案（1）：扩容&amp;缓存</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2018/11/05/20181105165724309/" title="高并发解决方案（4）：数据库切库分库分表&高可用"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-11-05</div><div class="relatedPosts_title">高并发解决方案（4）：数据库切库分库分表&高可用</div></div></a></div><div class="relatedPosts_item"><a href="/2018/11/05/20181105104407665/" title="高并发解决方案（3）：应用限流&服务降级与服务熔断"><img class="relatedPosts_cover lazyload"data-src="/img/default_p3.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-11-05</div><div class="relatedPosts_title">高并发解决方案（3）：应用限流&服务降级与服务熔断</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/31/20181031100154042/" title="高并发解决方案（1）：扩容&缓存"><img class="relatedPosts_cover lazyload"data-src="/img/default_p4.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-31</div><div class="relatedPosts_title">高并发解决方案（1）：扩容&缓存</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/30/20181030111752438/" title="并发编程与线程安全（6）：线程池 Executor&并发拓展"><img class="relatedPosts_cover lazyload"data-src="/img/default_p6.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-30</div><div class="relatedPosts_title">并发编程与线程安全（6）：线程池 Executor&并发拓展</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/29/20181029185403603/" title="并发编程与线程安全（5）：J.U.C组件拓展"><img class="relatedPosts_cover lazyload"data-src="/img/default_p2.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-29</div><div class="relatedPosts_title">并发编程与线程安全（5）：J.U.C组件拓展</div></div></a></div><div class="relatedPosts_item"><a href="/2018/10/27/20181027234153307/" title="并发编程与线程安全（4）：J.U.C之AQS"><img class="relatedPosts_cover lazyload"data-src="/img/default_p2.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-10-27</div><div class="relatedPosts_title">并发编程与线程安全（4）：J.U.C之AQS</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script><script>var notify = true == true ? true : false;
+var verify = false == true ? true : false;
+var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify:notify,
+  verify:verify,
+  appId:'yPVvDIaWlODDhs0bbECwLIIp-gzGzoHsz',
+  appKey:'VyOIa40LxnjURzW1HUCiwTpV',
+  placeholder:'记得留下你的昵称及邮箱，以便收到答复~',
+  avatar:'monsterid',
+  guest_info:guest_info,
+  pageSize:'10',
+  lang:'zh-cn',
+  recordIP: true
+});</script></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2020 By Machine</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://machine4869.gitee.io/">blog</a>!</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">简</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script id="canvas_nest" color="215,215,215" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

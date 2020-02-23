@@ -1,0 +1,444 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>Kylin-分布式分析引擎 | 哑舍</title><meta name="description" content="Kylin-分布式分析引擎"><meta name="keywords" content="大数据"><meta name="author" content="Machine"><meta name="copyright" content="Machine"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/cat2.ico"><link rel="preconnect" href="//cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link rel="preconnect" href="//busuanzi.ibruce.info"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Kylin-分布式分析引擎"><meta name="twitter:description" content="Kylin-分布式分析引擎"><meta name="twitter:image" content="https://machine4869.gitee.io/img/default_p7.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="Kylin-分布式分析引擎"><meta property="og:url" content="https://machine4869.gitee.io/2019/11/11/20191111151342292/"><meta property="og:site_name" content="哑舍"><meta property="og:description" content="Kylin-分布式分析引擎"><meta property="og:image" content="https://machine4869.gitee.io/img/default_p7.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>const autoChangeMode = 'false'
+var t = Cookies.get("theme");
+if (autoChangeMode == '1'){
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+const isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+if (t === undefined){
+  if (isLightMode) activateLightMode()
+  else if (isDarkMode) activateDarkMode()
+  else if (isNotSpecified || hasNoSupport){
+    console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+    now = new Date();
+    hour = now.getHours();
+    isNight = hour < 6 || hour >= 18
+    isNight ? activateDarkMode() : activateLightMode()
+}
+} else if (t == 'light') activateLightMode()
+else activateDarkMode()
+
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="canonical" href="https://machine4869.gitee.io/2019/11/11/20191111151342292/"><link rel="prev" title="Hue-Hadoop UI系统" href="https://machine4869.gitee.io/2019/11/15/20191115135655400/"><link rel="next" title="Impala-高性能SQL查询" href="https://machine4869.gitee.io/2019/11/11/20191111111820425/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://machine4869.gitee.io/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: 'Snackbar.bookmark.title',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"title":"Snackbar.bookmark.title","message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#2d3035","position":"bottom-left"},
+  baiduPush: false,
+  isHome: false,
+  isPost: true
+  
+}</script><meta name="generator" content="Hexo 4.2.0"></head><body><header> <div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">哑舍</a></span><span class="toggle-menu pull_right close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></span><span class="pull_right" id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></span></div></header><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">134</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">27</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">45</div></a></div></div></div><hr><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></div><div id="mobile-sidebar-toc"><div class="toc_mobile_headline">目录</div><div class="sidebar-toc__content"><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#概述"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">概述</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Kylin定义"><span class="toc_mobile_items-number">1.1.</span> <span class="toc_mobile_items-text">Kylin定义</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Kylin相关术语"><span class="toc_mobile_items-number">1.2.</span> <span class="toc_mobile_items-text">Kylin相关术语</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Kylin架构"><span class="toc_mobile_items-number">1.3.</span> <span class="toc_mobile_items-text">Kylin架构</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Kylin特点"><span class="toc_mobile_items-number">1.4.</span> <span class="toc_mobile_items-text">Kylin特点</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#Kylin环境搭建"><span class="toc_mobile_items-number">2.</span> <span class="toc_mobile_items-text">Kylin环境搭建</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#快速入门"><span class="toc_mobile_items-number">3.</span> <span class="toc_mobile_items-text">快速入门</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#数据准备"><span class="toc_mobile_items-number">3.1.</span> <span class="toc_mobile_items-text">数据准备</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#创建项目"><span class="toc_mobile_items-number">3.2.</span> <span class="toc_mobile_items-text">创建项目</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#创建Model"><span class="toc_mobile_items-number">3.3.</span> <span class="toc_mobile_items-text">创建Model</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#创建Cube"><span class="toc_mobile_items-number">3.4.</span> <span class="toc_mobile_items-text">创建Cube</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Hive和Kylin性能对比"><span class="toc_mobile_items-number">3.5.</span> <span class="toc_mobile_items-text">Hive和Kylin性能对比</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#Cube构建原理"><span class="toc_mobile_items-number">4.</span> <span class="toc_mobile_items-text">Cube构建原理</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Cube构建流程"><span class="toc_mobile_items-number">4.1.</span> <span class="toc_mobile_items-text">Cube构建流程</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Cube构建算法"><span class="toc_mobile_items-number">4.2.</span> <span class="toc_mobile_items-text">Cube构建算法</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#逐层构建算法（layer）"><span class="toc_mobile_items-number">4.2.1.</span> <span class="toc_mobile_items-text">逐层构建算法（layer）</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#快速构建算法（inmem）"><span class="toc_mobile_items-number">4.2.2.</span> <span class="toc_mobile_items-text">快速构建算法（inmem）</span></a></li></ol></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#Cube构建优化"><span class="toc_mobile_items-number">5.</span> <span class="toc_mobile_items-text">Cube构建优化</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#使用衍生维度（derived-dimension）"><span class="toc_mobile_items-number">5.1.</span> <span class="toc_mobile_items-text">使用衍生维度（derived dimension）</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#使用聚合组（Aggregation-group）"><span class="toc_mobile_items-number">5.2.</span> <span class="toc_mobile_items-text">使用聚合组（Aggregation group）</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#1、-强制维度（Mandatory）"><span class="toc_mobile_items-number">5.2.1.</span> <span class="toc_mobile_items-text">1、 强制维度（Mandatory）</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#2、-层级维度（Hierarchy）"><span class="toc_mobile_items-number">5.2.2.</span> <span class="toc_mobile_items-text">2、 层级维度（Hierarchy）</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#3、联合维度（Joint）"><span class="toc_mobile_items-number">5.2.3.</span> <span class="toc_mobile_items-text">3、联合维度（Joint）</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Row-Key优化"><span class="toc_mobile_items-number">5.3.</span> <span class="toc_mobile_items-text">Row Key优化</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#并发粒度优化"><span class="toc_mobile_items-number">5.4.</span> <span class="toc_mobile_items-text">并发粒度优化</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#补充"><span class="toc_mobile_items-number">6.</span> <span class="toc_mobile_items-text">补充</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#增量构建Cube"><span class="toc_mobile_items-number">6.1.</span> <span class="toc_mobile_items-text">增量构建Cube</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#流式构建"><span class="toc_mobile_items-number">6.2.</span> <span class="toc_mobile_items-text">流式构建</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#RestAPI"><span class="toc_mobile_items-number">6.3.</span> <span class="toc_mobile_items-text">RestAPI</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#BI工具集成"><span class="toc_mobile_items-number">7.</span> <span class="toc_mobile_items-text">BI工具集成</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#JDBC"><span class="toc_mobile_items-number">7.1.</span> <span class="toc_mobile_items-text">JDBC</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Zepplin"><span class="toc_mobile_items-number">7.2.</span> <span class="toc_mobile_items-text">Zepplin</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#安装启动"><span class="toc_mobile_items-number">7.2.1.</span> <span class="toc_mobile_items-text">安装启动</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#Zepplin概念"><span class="toc_mobile_items-number">7.2.2.</span> <span class="toc_mobile_items-text">Zepplin概念</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#配置Zepplin支持Kylin"><span class="toc_mobile_items-number">7.2.3.</span> <span class="toc_mobile_items-text">配置Zepplin支持Kylin</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-3"><a class="toc_mobile_items-link" href="#案例实操"><span class="toc_mobile_items-number">7.2.4.</span> <span class="toc_mobile_items-text">案例实操</span></a></li></ol></li></ol></li></ol></div></div></div><div id="body-wrap"><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true">     </i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Kylin定义"><span class="toc-number">1.1.</span> <span class="toc-text">Kylin定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kylin相关术语"><span class="toc-number">1.2.</span> <span class="toc-text">Kylin相关术语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kylin架构"><span class="toc-number">1.3.</span> <span class="toc-text">Kylin架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Kylin特点"><span class="toc-number">1.4.</span> <span class="toc-text">Kylin特点</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Kylin环境搭建"><span class="toc-number">2.</span> <span class="toc-text">Kylin环境搭建</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#快速入门"><span class="toc-number">3.</span> <span class="toc-text">快速入门</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#数据准备"><span class="toc-number">3.1.</span> <span class="toc-text">数据准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建项目"><span class="toc-number">3.2.</span> <span class="toc-text">创建项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建Model"><span class="toc-number">3.3.</span> <span class="toc-text">创建Model</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建Cube"><span class="toc-number">3.4.</span> <span class="toc-text">创建Cube</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Hive和Kylin性能对比"><span class="toc-number">3.5.</span> <span class="toc-text">Hive和Kylin性能对比</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Cube构建原理"><span class="toc-number">4.</span> <span class="toc-text">Cube构建原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Cube构建流程"><span class="toc-number">4.1.</span> <span class="toc-text">Cube构建流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Cube构建算法"><span class="toc-number">4.2.</span> <span class="toc-text">Cube构建算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#逐层构建算法（layer）"><span class="toc-number">4.2.1.</span> <span class="toc-text">逐层构建算法（layer）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#快速构建算法（inmem）"><span class="toc-number">4.2.2.</span> <span class="toc-text">快速构建算法（inmem）</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Cube构建优化"><span class="toc-number">5.</span> <span class="toc-text">Cube构建优化</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用衍生维度（derived-dimension）"><span class="toc-number">5.1.</span> <span class="toc-text">使用衍生维度（derived dimension）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用聚合组（Aggregation-group）"><span class="toc-number">5.2.</span> <span class="toc-text">使用聚合组（Aggregation group）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、-强制维度（Mandatory）"><span class="toc-number">5.2.1.</span> <span class="toc-text">1、 强制维度（Mandatory）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、-层级维度（Hierarchy）"><span class="toc-number">5.2.2.</span> <span class="toc-text">2、 层级维度（Hierarchy）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、联合维度（Joint）"><span class="toc-number">5.2.3.</span> <span class="toc-text">3、联合维度（Joint）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Row-Key优化"><span class="toc-number">5.3.</span> <span class="toc-text">Row Key优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#并发粒度优化"><span class="toc-number">5.4.</span> <span class="toc-text">并发粒度优化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#补充"><span class="toc-number">6.</span> <span class="toc-text">补充</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#增量构建Cube"><span class="toc-number">6.1.</span> <span class="toc-text">增量构建Cube</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#流式构建"><span class="toc-number">6.2.</span> <span class="toc-text">流式构建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#RestAPI"><span class="toc-number">6.3.</span> <span class="toc-text">RestAPI</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#BI工具集成"><span class="toc-number">7.</span> <span class="toc-text">BI工具集成</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JDBC"><span class="toc-number">7.1.</span> <span class="toc-text">JDBC</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Zepplin"><span class="toc-number">7.2.</span> <span class="toc-text">Zepplin</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装启动"><span class="toc-number">7.2.1.</span> <span class="toc-text">安装启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Zepplin概念"><span class="toc-number">7.2.2.</span> <span class="toc-text">Zepplin概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Zepplin支持Kylin"><span class="toc-number">7.2.3.</span> <span class="toc-text">配置Zepplin支持Kylin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#案例实操"><span class="toc-number">7.2.4.</span> <span class="toc-text">案例实操</span></a></li></ol></li></ol></li></ol></div></div></div><main id="content-outer"><div id="top-container" style="background-image: url(/img/default_p7.jpeg)"><div id="post-info"><div id="post-title"><div class="posttitle">Kylin-分布式分析引擎</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 发表于 2019-11-11<span class="post-meta__separator">|</span><i class="fa fa-history fa-fw" aria-hidden="true"></i> 更新于 2019-11-28</time><span class="post-meta__separator">|</span><span><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83%E5%BC%8F/">大数据分布式</a><i class="fa fa-angle-right fa-fw" aria-hidden="true"></i><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83%E5%BC%8F/%E5%88%86%E5%B8%83%E5%BC%8F%E5%88%86%E6%9E%90%E5%BC%95%E6%93%8E/">分布式分析引擎</a></span><div class="post-meta-wordcount"><i class="fa fa-file-word-o post-meta__icon fa-fw" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">4.6k</span><span class="post-meta__separator">|</span><i class="fa fa-clock-o post-meta__icon fa-fw" aria-hidden="true"></i><span>阅读时长: 16 分钟</span><div class="post-meta-pv-cv"><span class="post-meta__separator">|</span><span><i class="fa fa-eye post-meta__icon fa-fw" aria-hidden="true"> </i>阅读量:</span><span id="busuanzi_value_page_pv"></span><span class="post-meta__separator">|</span><i class="fa fa-comments-o post-meta__icon fa-fw" aria-hidden="true"></i><span>评论数:</span><a href="/2019/11/11/20191111151342292/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2019/11/11/20191111151342292/" itemprop="commentCount"></span></a></div></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><blockquote>
+<p>ref</p>
+<ul>
+<li><a href="http://kylin.apache.org/cn/" target="_blank" rel="noopener">http://kylin.apache.org/cn/</a></li>
+</ul>
+</blockquote>
+<p>[toc]</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="Kylin定义"><a href="#Kylin定义" class="headerlink" title="Kylin定义"></a>Kylin定义</h2><p>Apache Kylin是一个开源的分布式分析引擎，提供Hadoop/Spark之上的SQL查询接口及多维分析（OLAP）能力以支持超大规模数据，最初由eBay开发并贡献至开源社区。它能在亚秒内查询巨大的Hive表。</p>
+<p>空间换时间：数据都提前计算好了</p>
+<h2 id="Kylin相关术语"><a href="#Kylin相关术语" class="headerlink" title="Kylin相关术语"></a>Kylin相关术语</h2><ul>
+<li><p>Data Warehouse（数据仓库）</p>
+<p>数据仓库是一个各种数据（包括历史数据和当前数据）的中心存储系统，是BI（ business intelligence ，商业智能）的核心部件。</p>
+<p>这里所谈的数据包括来自企业业务系统的订单、库存、交易账目、客户和供应商等来自企业所处行业和竞争对手的数据以及来自企业所处的其他外部环境中的各种数据。</p>
+</li>
+<li><p>Business Intelligence（商业智能）</p>
+<p>商业智能通常被理解为将企业中现有的数据转化为知识，帮助企业做出明智的业务经营决策的工具。</p>
+<p>为了将数据转化为知识，需要利用数据仓库、联机分析处理（OLAP）工具和数据挖掘等技术。</p>
+</li>
+<li><p>OLAP（online analytical processing）</p>
+<p>OLAP（online analytical processing）是一种软件技术，它使分析人员能够迅速、一致、交互地从各个方面观察信息，以达到深入理解数据的目的。从各方面观察信息，也就是从不同的维度分析数据，因此OLAP也成为多维分析。</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.33.23.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.33.23" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.33.23" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.33.23" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.33.23.png" class="lazyload"></a>
+
+
+
+</li>
+</ul>
+<p>  OLAP 类型</p>
+  <a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.35.06.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.35.06" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.35.06" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.35.06" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.35.06.png" class="lazyload"></a>
+
+<ul>
+<li><p>OLAP Cube</p>
+<p>MOLAP基于多维数据集，一个多维数据集称为一个OLAP Cube</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.36.20.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.36.20" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.36.20" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.36.20" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.36.20.png" class="lazyload"></a>
+</li>
+<li><p>Cube &amp; Cuboid</p>
+<p>按照不同角度分析</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.39.45.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.39.45" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.39.45" style="zoom:30%;" title="屏幕快照 2019-11-11 下午3.39.45" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.39.45.png" class="lazyload"></a>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p>Star Schema（星型模型）</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.45.03-3458320.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.45.03" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.45.03" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.45.03" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.45.03-3458320.png" class="lazyload"></a>
+
+<ul>
+<li><p>Fact Table（事实表） &amp;  Dimension Table（维度表）</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.45.53.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.45.53" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.45.53" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.45.53" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.45.53.png" class="lazyload"></a>
+</li>
+</ul>
+</li>
+<li><p>Dimension（维度） &amp; Measure（度量）</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.46.36.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.46.36" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.46.36" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.46.36" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.46.36.png" class="lazyload"></a>
+
+
+
+</li>
+</ul>
+<p>维度：分析数据的数据的角度</p>
+<p>度量：被分析的指标</p>
+<h2 id="Kylin架构"><a href="#Kylin架构" class="headerlink" title="Kylin架构"></a>Kylin架构</h2><p>将hive作为数据仓库，所有维度分析好后，存在Hbase里（数据存储），Kylin再提供SQL接口来查Hbase，底层自己做SQL转Hase查询，以屏蔽底层技术。这样开发人员只需掌握SQL。</p>
+<a href="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.59.48.png" data-fancybox="group" data-caption="屏幕快照 2019-11-11 下午3.59.48" class="fancybox"><img alt="屏幕快照 2019-11-11 下午3.59.48" style="zoom:40%;" title="屏幕快照 2019-11-11 下午3.59.48" data-src="/2019/11/11/20191111151342292/屏幕快照 2019-11-11 下午3.59.48.png" class="lazyload"></a>
+
+<p>1）REST Server</p>
+<p>REST Server是一套面向应用程序开发的入口点，旨在实现针对Kylin平台的应用开发工作。 此类应用程序可以提供查询、获取结果、触发cube构建任务、获取元数据以及获取用户权限等等。另外可以通过Restful接口实现SQL查询。</p>
+<p>2）查询引擎（Query Engine）</p>
+<p>当cube准备就绪后，查询引擎就能够获取并解析用户查询。它随后会与系统中的其它组件进行交互，从而向用户返回对应的结果。 </p>
+<p>3）路由器（Routing）</p>
+<p>在最初设计时曾考虑过将Kylin不能执行的查询引导去Hive中继续执行，但在实践后发现Hive与Kylin的速度差异过大，导致用户无法对查询的速度有一致的期望，很可能大多数查询几秒内就返回结果了，而有些查询则要等几分钟到几十分钟，因此体验非常糟糕。最后这个路由功能在发行版中默认关闭。</p>
+<p>4）元数据管理工具（Metadata）</p>
+<p>Kylin是一款元数据驱动型应用程序。元数据管理工具是一大关键性组件，用于对保存在Kylin当中的所有元数据进行管理，其中包括最为重要的cube元数据。其它全部组件的正常运作都需以元数据管理工具为基础。 Kylin的元数据存储在hbase中。 </p>
+<p>5）任务引擎（Cube Build Engine）</p>
+<p>这套引擎的设计目的在于处理所有离线任务，其中包括shell脚本、Java API以及Map Reduce任务等等。任务引擎对Kylin当中的全部任务加以管理与协调，从而确保每一项任务都能得到切实执行并解决其间出现的故障。</p>
+<h2 id="Kylin特点"><a href="#Kylin特点" class="headerlink" title="Kylin特点"></a>Kylin特点</h2><p>Kylin的主要特点包括支持SQL接口、支持超大规模数据集、亚秒级响应、可伸缩性、高吞吐率、BI工具集成等。</p>
+<p>1）标准SQL接口：Kylin是以标准的SQL作为对外服务的接口。</p>
+<p>2）支持超大数据集：Kylin对于大数据的支撑能力可能是目前所有技术中最为领先的。早在2015年eBay的生产环境中就能支持百亿记录的秒级查询，之后在移动的应用场景中又有了千亿记录秒级查询的案例。</p>
+<p>3）亚秒级响应：Kylin拥有优异的查询相应速度，这点得益于预计算，很多复杂的计算，比如连接、聚合，在离线的预计算过程中就已经完成，这大大降低了查询时刻所需的计算量，提高了响应速度。</p>
+<p>4）可伸缩性和高吞吐率：单节点Kylin可实现每秒70个查询，还可以搭建Kylin的集群。</p>
+<p>5）BI工具集成</p>
+<p>Kylin可以与现有的BI工具集成，具体包括如下内容。</p>
+<p>ODBC：与Tableau、Excel、PowerBI等工具集成</p>
+<p>JDBC：与Saiku、BIRT等Java工具集成</p>
+<p>RestAPI：与JavaScript、Web网页集成</p>
+<p>Kylin开发团队还贡献了<strong>Zepplin</strong>的插件，也可以使用Zepplin来访问Kylin服务。</p>
+<h1 id="Kylin环境搭建"><a href="#Kylin环境搭建" class="headerlink" title="Kylin环境搭建"></a>Kylin环境搭建</h1><p>解压apache-kylin-2.5.1-bin-cdh57.tar.gz</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ tar -zxvf apache-kylin-2.5.1-bin-cdh57.tar.gz -C apps&#x2F;</span><br></pre></td></tr></table></figure></div>
+
+<p>需要在/etc/profile文件中配置HADOOP_HOME，HIVE_HOME，HBASE_HOME并source使其生效。</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">shell</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动Kylin之前要保证HDFS，YARN，JobHistoryServer ,ZK，HBASE相关进程是正常运行的。</span></span><br></pre></td></tr></table></figure></div>
+
+<p>从2.6.1开始，不内置spark了</p>
+<p>启动</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">shell</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">bin/kylin.sh start</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> http://mxxcentos7:7070/kylin</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 用户名为：ADMIN，密码为：KYLIN</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h1 id="快速入门"><a href="#快速入门" class="headerlink" title="快速入门"></a>快速入门</h1><h2 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h2><p>在Hive中创建数据，分别创建部门和员工外部表，并向表中导入数据。</p>
+<p><strong>原始数据</strong></p>
+<p>dept.txt</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">10	ACCOUNTING	1700</span><br><span class="line">20	RESEARCH	1800</span><br><span class="line">30	SALES	1900</span><br><span class="line">40	OPERATIONS	1700</span><br></pre></td></tr></table></figure></div>
+
+<p>emp.txt</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">7369	SMITH	CLERK	7902	1980-12-17	800.0	NULL	20</span><br><span class="line">7499	ALLEN	SALESMAN	7698	1981-2-20	1600.0	300.0	30</span><br><span class="line">7521	WARD	SALESMAN	7698	1981-2-22	1250.0	500.0	30</span><br><span class="line">7566	JONES	MANAGER	7839	1981-4-2	2975.0	NULL	20</span><br><span class="line">7654	MARTIN	SALESMAN	7698	1981-9-28	1250.0	1400.0	30</span><br><span class="line">7698	BLAKE	MANAGER	7839	1981-5-1	2850.0	NULL	30</span><br><span class="line">7782	CLARK	MANAGER	7839	1981-6-9	2450.0	NULL	10</span><br><span class="line">7788	SCOTT	ANALYST	7566	1987-4-19	3000.0	NULL	20</span><br><span class="line">7839	KING	PRESIDENT	NULL	1981-11-17	5000.0	NULL	10</span><br><span class="line">7844	TURNER	SALESMAN	7698	1981-9-8	1500.0	0.0	30</span><br><span class="line">7876	ADAMS	CLERK	7788	1987-5-23	1100.0	NULL	20</span><br><span class="line">7900	JAMES	CLERK	7698	1981-12-3	950.0	NULL	30</span><br><span class="line">7902	FORD	ANALYST	7566	1981-12-3	3000.0	NULL	20</span><br><span class="line">7934	MILLER	CLERK	7782	1982-1-23	1300.0	NULL	10</span><br></pre></td></tr></table></figure></div>
+
+
+
+<p><strong>建表语句</strong>  </p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">shell</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建部门表</span></span><br><span class="line">create external table if not exists default.dept(</span><br><span class="line">deptno int,</span><br><span class="line">dname string,</span><br><span class="line">loc int</span><br><span class="line">)</span><br><span class="line">row format delimited fields terminated by '\t';</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建员工表</span></span><br><span class="line">create external table if not exists default.emp(</span><br><span class="line">empno int,</span><br><span class="line">ename string,</span><br><span class="line">job string,</span><br><span class="line">mgr int,</span><br><span class="line">hiredate string, </span><br><span class="line">sal double, </span><br><span class="line">comm double,</span><br><span class="line">deptno int)</span><br><span class="line">row format delimited fields terminated by '\t';</span><br></pre></td></tr></table></figure></div>
+
+
+
+<p><strong>向外部表中导入数据</strong></p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">shell</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看创建的表</span></span><br><span class="line">show tables;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 导入数据</span></span><br><span class="line">load data local inpath '/media/psf/centos_share/dept.txt' into table default.dept;</span><br><span class="line">load data local inpath '/media/psf/centos_share/emp.txt' into table default.emp;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看结果</span></span><br><span class="line">select * from emp;</span><br><span class="line">select * from dept;</span><br></pre></td></tr></table></figure></div>
+
+
+
+
+
+<h2 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h2><p>1、登录系统  </p>
+<p>2、创建工程  </p>
+<p>3、选择数据源 </p>
+<p>都是界面操作：略</p>
+<h2 id="创建Model"><a href="#创建Model" class="headerlink" title="创建Model"></a>创建Model</h2><p>1、回到Models页面  </p>
+<p>2、点击New按钮后点击New Model  </p>
+<p>3、填写Model名称及描述后Next  </p>
+<p>4、选择事实表</p>
+<p>5、添加维度表</p>
+<p>6、选择添加的维度及join字段</p>
+<p>7、选择维度信息</p>
+<p>8、选择度量信息</p>
+<p>9、添加分区信息及过滤条件之后“Save”  </p>
+<p>10、创建Model完成</p>
+<h2 id="创建Cube"><a href="#创建Cube" class="headerlink" title="创建Cube"></a>创建Cube</h2><p>1、点击New按钮然后选择New Cube</p>
+<p>2、选择Model及填写Cube Name  </p>
+<p>3、添加维度  </p>
+<p>4、添加需要做预计算的内容  </p>
+<p>6、动态更新相关（默认）</p>
+<p>7、高阶模块（默认）</p>
+<p>8、需要修改的配置</p>
+<p>9、Cube信息展示</p>
+<p>10、Cube配置完成</p>
+<p>11、触发预计算  </p>
+<p>12、查看Build进度</p>
+<p>13、构建Cube完成</p>
+<h2 id="Hive和Kylin性能对比"><a href="#Hive和Kylin性能对比" class="headerlink" title="Hive和Kylin性能对比"></a>Hive和Kylin性能对比</h2><div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">点击insite，写个SQL查一下</span><br><span class="line"></span><br><span class="line">select dept.dname, sum(emp.sal) from emp join dept on emp.deptno &#x3D; dept.deptno group by dept.dname;</span><br><span class="line"></span><br><span class="line">在虚拟机2核4G的配置里跑了6s出结果</span><br><span class="line">第二次查有缓存，0.01s</span><br><span class="line"></span><br><span class="line">和hive性能对比怎么样呢？</span><br><span class="line"></span><br><span class="line">hive&gt; select dept.dname, sum(emp.sal) from emp join dept on emp.deptno &#x3D; dept.deptno group by dept.dname;</span><br><span class="line"></span><br><span class="line">Time taken: 49.835 seconds, Fetched: 3 row(s)</span><br></pre></td></tr></table></figure></div>
+
+<p>49s vs 6s 区别还是大的，kylin做了预计算然后存储，就是以空间换时间，而且查过的还能缓存，下次查就是0.0几秒出结果。</p>
+<h1 id="Cube构建原理"><a href="#Cube构建原理" class="headerlink" title="Cube构建原理"></a>Cube构建原理</h1><h2 id="Cube构建流程"><a href="#Cube构建流程" class="headerlink" title="Cube构建流程"></a>Cube构建流程</h2><p>第一步：创建中建表</p>
+<a href="/2019/11/11/20191111151342292/image-20191114131237790.png" data-fancybox="group" data-caption="image-20191114131237790" class="fancybox"><img alt="image-20191114131237790" style="zoom:70%;" title="image-20191114131237790" data-src="/2019/11/11/20191111151342292/image-20191114131237790.png" class="lazyload"></a>
+
+
+
+<p>第二步：将中建表的数据均匀分配到不同的文件</p>
+<a href="/2019/11/11/20191111151342292/image-20191114131610229.png" data-fancybox="group" data-caption="image-20191114131610229" class="fancybox"><img alt="image-20191114131610229" style="zoom:50%;" title="image-20191114131610229" data-src="/2019/11/11/20191111151342292/image-20191114131610229.png" class="lazyload"></a>
+
+
+
+<p>reduce产生文件大小分区不均匀，分配均匀，减轻后面的数据倾斜</p>
+<p>1、统计总行数<br>2、规定每个mapper的行数1000000（这个数据小于HDFS文件块大小，不会被分片，效果就是一个文件一个分片）<br>3、计算出一共要生成160个文件(DISTRIBUITE BY RAND() : 将指定的字段放在一个reducer里)<br>4、下一次mapper的个数就是160了</p>
+<p>中建表的文件已经均匀分配了</p>
+<p>第三步：创建维度字典表</p>
+<a href="/2019/11/11/20191111151342292/pic1-3709273.png" data-fancybox="group" data-caption="image-20191114131610229" class="fancybox"><img alt="image-20191114131610229" style="zoom:60%;" title="image-20191114131610229" data-src="/2019/11/11/20191111151342292/pic1-3709273.png" class="lazyload"></a>
+
+<p>存到Hbase里<br>用数字代替字段，中间要加字典表来映射，这样Hbase可以少存点数据</p>
+<p>然后就开始跑MR: </p>
+<ul>
+<li>把字典表缓存到内存里，根据kv映射替换值</li>
+</ul>
+<p>第四步：构建Cube</p>
+<a href="/2019/11/11/20191111151342292/pic.png" data-fancybox="group" data-caption="image-20191114131610229" class="fancybox"><img alt="image-20191114131610229" style="zoom:60%;" title="image-20191114131610229" data-src="/2019/11/11/20191111151342292/pic.png" class="lazyload"></a>
+
+
+
+<p>相当于执行select语句，翻译成MR，每个维度都要</p>
+<p>第五步：Hbase K-V</p>
+<a href="/2019/11/11/20191111151342292/image-20191114133840833.png" data-fancybox="group" data-caption="image-20191114133840833" class="fancybox"><img alt="image-20191114133840833" style="zoom:80%;" title="image-20191114133840833" data-src="/2019/11/11/20191111151342292/image-20191114133840833.png" class="lazyload"></a>
+
+<p>111 代表3个维度都有 000 代表三个维度的字典值</p>
+<p>第六步：将cube data 转成Hfile格式并导入HBase</p>
+<a href="/2019/11/11/20191111151342292/image-20191114134242710.png" data-fancybox="group" data-caption="image-20191114134242710" class="fancybox"><img alt="image-20191114134242710" style="zoom:50%;" title="image-20191114134242710" data-src="/2019/11/11/20191111151342292/image-20191114134242710.png" class="lazyload"></a>
+
+<h2 id="Cube构建算法"><a href="#Cube构建算法" class="headerlink" title="Cube构建算法"></a>Cube构建算法</h2><h3 id="逐层构建算法（layer）"><a href="#逐层构建算法（layer）" class="headerlink" title="逐层构建算法（layer）"></a>逐层构建算法（layer）</h3><a href="/2019/11/11/20191111151342292/pic2.png" data-fancybox="group" data-caption="pic2.png" class="fancybox"><img alt="pic2.png" style="zoom:60%;" title="pic2.png" data-src="/2019/11/11/20191111151342292/pic2.png" class="lazyload"></a>  
+
+<p>每个层级的计算（除了第一层，它是从原始数据聚合而来），是基于它上一层级的结果来计算的。</p>
+<ul>
+<li><p>为啥从高纬度开始构建？<br>因为低纬度可以从低纬度开出来</p>
+</li>
+<li><p>需要多少MR?<br>一层一个。把子cuboid送到reduce端，第一个mr结束了，hdfs上存的就是2个维度的cuboid，继续给mr2跑，得到的就是一个维度的cuboid了</p>
+<p>每一轮的计算都是一个MapReduce任务，且串行执行；一个N维的Cube，至少需要N次MapReduce Job。</p>
+</li>
+</ul>
+<a href="/2019/11/11/20191111151342292/image-20191114142703441.png" data-fancybox="group" data-caption="image-20191114142703441" class="fancybox"><img alt="image-20191114142703441" style="zoom:50%;" title="image-20191114142703441" data-src="/2019/11/11/20191111151342292/image-20191114142703441.png" class="lazyload"></a> 
+
+<p>缺点：</p>
+<ul>
+<li>MR多</li>
+<li>Shuffer工作量大</li>
+<li>对HDFS的读写操作较多  </li>
+</ul>
+<h3 id="快速构建算法（inmem）"><a href="#快速构建算法（inmem）" class="headerlink" title="快速构建算法（inmem）"></a>快速构建算法（inmem）</h3><a href="/2019/11/11/20191111151342292/image-20191114142944437.png" data-fancybox="group" data-caption="image-20191114142944437" class="fancybox"><img alt="image-20191114142944437" style="zoom:80%;" title="image-20191114142944437" data-src="/2019/11/11/20191111151342292/image-20191114142944437.png" class="lazyload"></a> 
+
+
+
+<p>只跑一个MR</p>
+<ul>
+<li><p>map端分split数据（160），map端把所有层都算出来，然后所有数据发到reduce去聚合。<br>所以在一个map做计算，相当于把一个128M全部加载到内存。比上个算法块30%</p>
+</li>
+<li><p>直接在内存里聚合（在map端聚合），然后把全部的维度输出到reducer聚合</p>
+</li>
+</ul>
+<a href="/2019/11/11/20191111151342292/image-20191114143429137.png" data-fancybox="group" data-caption="image-20191114143429137" class="fancybox"><img alt="image-20191114143429137" style="zoom:50%;" title="image-20191114143429137" data-src="/2019/11/11/20191111151342292/image-20191114143429137.png" class="lazyload"></a> 
+
+<p>特点：在map做预聚合</p>
+<p>如何选择？</p>
+<ul>
+<li>集群资源可以的话，可以选第二个算法。</li>
+<li>如果不了解集群资源，可以选auto选项，交给kylin自动判断和选择</li>
+</ul>
+<p>在页面Monitor可以看到具体算法</p>
+<h1 id="Cube构建优化"><a href="#Cube构建优化" class="headerlink" title="Cube构建优化"></a>Cube构建优化</h1><p>如果有20个维度，就有2的20次方个cuboid，对存储引擎压力太大了。所以要想办法减少维度。<br>比如年月日三个维度。年和日的组合是没有意义的，所以可以删掉</p>
+<p>剪枝优化（即减少Cuboid的生成）。  </p>
+<h2 id="使用衍生维度（derived-dimension）"><a href="#使用衍生维度（derived-dimension）" class="headerlink" title="使用衍生维度（derived dimension）"></a>使用衍生维度（derived dimension）</h2><p>将维度表上的非主键维度排除掉，并使用维度表的主键（其实是事实表上相应的外键）来替代它们。Kylin会在底层记录维度表主键与维度表其他维度之间的映射关系，以便在查询时能够动态地将维度表的主键“翻译”成这些非主键维度，并进行实时聚合。</p>
+<a href="/2019/11/11/20191111151342292/image-20191114144739184.png" data-fancybox="group" data-caption="image-20191114144739184" class="fancybox"><img alt="image-20191114144739184" style="zoom:50%;" title="image-20191114144739184" data-src="/2019/11/11/20191111151342292/image-20191114144739184.png" class="lazyload"></a> 
+
+<p>解释：</p>
+<p>nomal方式构建的话，需要7种</p>
+<p>选用derive，将维度表上的非主键维度排除掉（就是排除E）, 并使用维度表的主键（其实是事实表上相应的外键）来替代它们(就是使用A替代E，因为A和E之间有映射关系，F(A)=E。从A–&gt;D—&gt;E)，这样构建的cuboid就很少</p>
+<p>具体是怎么实施的？</p>
+<a href="/2019/11/11/20191111151342292/image-20191114145303458.png" data-fancybox="group" data-caption="image-20191114145303458" class="fancybox"><img alt="image-20191114145303458" style="zoom:50%;" title="image-20191114145303458" data-src="/2019/11/11/20191111151342292/image-20191114145303458.png" class="lazyload"></a> 
+
+<ul>
+<li><p>用A去构建</p>
+</li>
+<li><p>查询时用E替换</p>
+</li>
+<li><p>查询Hbase结果是要做聚合计算的（又变慢了，就是拿一定的时间换空间了）</p>
+</li>
+</ul>
+<p>虽然衍生维度具有非常大的吸引力，但这也并不是说所有维度表上的维度都得变成衍生维度，如果从维度表主键到某个维度表维度所需要的聚合工作量非常大，则不建议使用衍生维度。</p>
+<p>例如，年构建derived，那365天要聚合，工作量巨大，每次查询都要重新做聚合计算</p>
+<p>所以，对某些聚合工作量大的维度，可以选择不使用衍生维度吗？怎么做？</p>
+<p>页面配置：每个维度都能单独选的</p>
+<p> 实验：页面使用derive方式构建cube，看下空间和时间的变化。</p>
+<h2 id="使用聚合组（Aggregation-group）"><a href="#使用聚合组（Aggregation-group）" class="headerlink" title="使用聚合组（Aggregation group）"></a>使用聚合组（Aggregation group）</h2><p>例子：年和日没必要组合。</p>
+<p>对于每个分组内部的维度，用户可以使用如下三种可选的方式定义，它们之间的关系，具体如下。</p>
+<h3 id="1、-强制维度（Mandatory）"><a href="#1、-强制维度（Mandatory）" class="headerlink" title="1、 强制维度（Mandatory）"></a>1、 强制维度（Mandatory）</h3><p>如果一个维度被定义为强制维度，那么这个分组产生的所有Cuboid中每一个Cuboid都会包含该维度。<br>只构建包含强制维度的cuboid，其他就不构建了。</p>
+<p>原理</p>
+<a href="/2019/11/11/20191111151342292/image-20191114151319747.png" data-fancybox="group" data-caption="image-20191114151319747" class="fancybox"><img alt="image-20191114151319747" style="zoom:50%;" title="image-20191114151319747" data-src="/2019/11/11/20191111151342292/image-20191114151319747.png" class="lazyload"></a>  
+
+
+
+<h3 id="2、-层级维度（Hierarchy）"><a href="#2、-层级维度（Hierarchy）" class="headerlink" title="2、 层级维度（Hierarchy）"></a>2、 层级维度（Hierarchy）</h3><p>例如：省市区、年月日</p>
+<a href="/2019/11/11/20191111151342292/image-20191114151833477.png" data-fancybox="group" data-caption="image-20191114151833477" class="fancybox"><img alt="image-20191114151833477" style="zoom:50%;" title="image-20191114151833477" data-src="/2019/11/11/20191111151342292/image-20191114151833477.png" class="lazyload"></a> 
+
+<p>B必须依赖于A出现</p>
+<h3 id="3、联合维度（Joint）"><a href="#3、联合维度（Joint）" class="headerlink" title="3、联合维度（Joint）"></a>3、联合维度（Joint）</h3><p>AB必须同时出现</p>
+<a href="/2019/11/11/20191111151342292/image-20191114151945549.png" data-fancybox="group" data-caption="image-20191114151945549" class="fancybox"><img alt="image-20191114151945549" style="zoom:50%;" title="image-20191114151945549" data-src="/2019/11/11/20191111151342292/image-20191114151945549.png" class="lazyload"></a>  
+
+
+
+
+
+<p>页面配置：</p>
+<p>Cube Designer的Advanced Setting中  </p>
+<p>可设置上面讲的3种维度</p>
+<h2 id="Row-Key优化"><a href="#Row-Key优化" class="headerlink" title="Row Key优化"></a>Row Key优化</h2><p>Hbase的Row Key优化</p>
+<p>Kylin会把所有的维度按照顺序组合成一个完整的Rowkey，并且按照这个Rowkey升序排列Cuboid中所有的行。</p>
+<p>设计良好的Rowkey将更有效地完成数据的查询过滤和定位，减少IO次数，提高查询速度，维度在rowkey中的次序，对查询性能有显著的影响。</p>
+<p>1、被用作where过滤的维度放在Row Key前边</p>
+<a href="/2019/11/11/20191111151342292/image-20191114153453761.png" data-fancybox="group" data-caption="image-20191114153453761" class="fancybox"><img alt="image-20191114153453761" style="zoom:50%;" title="image-20191114153453761" data-src="/2019/11/11/20191111151342292/image-20191114153453761.png" class="lazyload"></a>
+
+<p>这个表已经存在hbase了现在要查这个select，scan的时候会去3个地方。优化后，只需要查一个地方</p>
+<p>怎么放？页面设置</p>
+<p>2、基数大的维度放在基数小的维度前边</p>
+<p>基数：月的基数是12，日是31，星期是7，也就是distinct那个字典值。</p>
+<a href="/2019/11/11/20191111151342292/image-20191114154152314.png" data-fancybox="group" data-caption="image-20191114154152314" class="fancybox"><img alt="image-20191114154152314" style="zoom:50%;" title="image-20191114154152314" data-src="/2019/11/11/20191111151342292/image-20191114154152314.png" class="lazyload"></a>
+
+<p>AB这个维度从哪来？<br>内部机制，选cuboid id小的</p>
+<p>基数小，聚合工作量也小，所以要把基数大的放前面。</p>
+<p>页面配置：</p>
+<p>Cube Designer的Advanced Setting中  </p>
+<p>可设置RowKey顺序</p>
+<h2 id="并发粒度优化"><a href="#并发粒度优化" class="headerlink" title="并发粒度优化"></a>并发粒度优化</h2><p>从Hbase查时，读取并发度</p>
+<p>一个表有多个region分区，目的是方便扩展，还有并发读取。</p>
+<p>没有预分区，最开始是一个region的，然后到达数量后自动拆分。</p>
+<p>1、kylin.hbase.region.cut</p>
+<p>kylin的 “kylin.hbase.region.cut”  可设置拆分，默认值5GB。如果5G以内，我就想实现并发，就可以手动设置这个值</p>
+<p>2、kylin.hbase.region.count.min（默认为1）   和  kylin.hbase.region.count.max  （默认为500）  </p>
+<p>这个相当于在开始就进行预分区，这样也能保证并发度</p>
+<p>一般就改kylin.hbase.region.cut和kylin.hbase.region.count.min</p>
+<p>页面配置：</p>
+<p>Cube Designer 的Configuration Overwrites  </p>
+<p>配置覆写，比系统默认配置优先级高</p>
+<h1 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h1><h2 id="增量构建Cube"><a href="#增量构建Cube" class="headerlink" title="增量构建Cube"></a>增量构建Cube</h2><p>相当于数据每天增量进来，cube也需要每天增量去构建</p>
+<p>1、disable: Hbase那个表</p>
+<p>2、编辑Model，在setting那</p>
+<p>指定Model分区策略(必做)</p>
+<p>1、选择要分区的表：订单表</p>
+<p>2、选分区列：按时间分</p>
+<p>3、选择时间格式</p>
+<p>4、Has a sep</p>
+<p>​    日期和时间如果是2个字段，上面就选日期，下面选时间</p>
+<p>然后还要改Cube的设置（可选）</p>
+<p>1、在refresh setting那</p>
+<p>2、一天构建一个cube的话，多了会自动触发合并，这里就是改合并时间的策略。</p>
+<a href="/2019/11/11/20191111151342292/image-20191114160741190.png" data-fancybox="group" data-caption="image-20191114160741190" class="fancybox"><img alt="image-20191114160741190" style="zoom:100%;" title="image-20191114160741190" data-src="/2019/11/11/20191111151342292/image-20191114160741190.png" class="lazyload"></a>
+
+<p>比如到第7天：我就开始小合并，把7天的segment合并一下。</p>
+<p>第8天，就等到第14天，又把7天的segment合并一下。</p>
+<p>到了3个7天+7个一天的时候，直接合并成28天的。</p>
+<p>3、partition start date </p>
+<p>从哪一天开始合并</p>
+<p>每天buid一次</p>
+<h2 id="流式构建"><a href="#流式构建" class="headerlink" title="流式构建"></a>流式构建</h2><p>对接kafka要用的</p>
+<p>TODO</p>
+<h2 id="RestAPI"><a href="#RestAPI" class="headerlink" title="RestAPI"></a>RestAPI</h2><blockquote>
+<p><a href="http://kylin.apache.org/cn/docs/howto/howto_use_restapi.html" target="_blank" rel="noopener">http://kylin.apache.org/cn/docs/howto/howto_use_restapi.html</a></p>
+</blockquote>
+<p>就是，在页面能做的，都能通过restAPI做</p>
+<p>演示一个query的</p>
+<p>Curl Example</p>
+<p>在linux下查一下</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">Code</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST --user ADMIN:KYLIN -H &quot;Content-Type: application&#x2F;json&quot; -d &#39;&#123; &quot;sql&quot;:&quot;select dept.dname, sum(emp.sal) from emp join dept on emp.deptno &#x3D; dept.deptno group by dept.dname;&quot;, &quot;project&quot;:&quot;emp_project&quot; &#125;&#39; http:&#x2F;&#x2F;mxxcentos7:7070&#x2F;kylin&#x2F;api&#x2F;query</span><br></pre></td></tr></table></figure></div>
+
+
+
+<h1 id="BI工具集成"><a href="#BI工具集成" class="headerlink" title="BI工具集成"></a>BI工具集成</h1><h2 id="JDBC"><a href="#JDBC" class="headerlink" title="JDBC"></a>JDBC</h2><div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">xml</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.kylin<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>kylin-jdbc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.5.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure></div>
+
+<p>demo</p>
+<div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">java</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> mxx.kylin;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.sql.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestJDBC</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException, SQLException </span>&#123;</span><br><span class="line"></span><br><span class="line">        String driverClass = <span class="string">"org.apache.kylin.jdbc.Driver"</span>;</span><br><span class="line"></span><br><span class="line">        String url = <span class="string">"jdbc:kylin://mxxcentos7:7070/emp_project"</span>;</span><br><span class="line"></span><br><span class="line">        String user = <span class="string">"ADMIN"</span>;</span><br><span class="line"></span><br><span class="line">        String password = <span class="string">"KYLIN"</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1 加载驱动</span></span><br><span class="line">        Class.forName(driverClass);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2 获取连接</span></span><br><span class="line">        Connection connection = DriverManager.getConnection(url, user, password);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3 SQL</span></span><br><span class="line">        String sql = <span class="string">"select dept.dname, sum(emp.sal) from emp join dept on emp.deptno = dept.deptno group by dept.dname;"</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4 预编译SQL</span></span><br><span class="line">        PreparedStatement ps = connection.prepareStatement(sql);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5 执行SQL</span></span><br><span class="line">        ResultSet resultSet = ps.executeQuery();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 6 打印结果</span></span><br><span class="line">        <span class="keyword">while</span>(resultSet.next())&#123;</span><br><span class="line">            System.out.println(resultSet.getString(<span class="number">1</span>)+<span class="string">"\t"</span></span><br><span class="line">            + resultSet.getDouble(<span class="number">2</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 7 关闭</span></span><br><span class="line">        connection.close();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></div>
+
+<p>这个查的很快，相当于从数据仓库hive拿了数据，预处理后存在Hbase里，所以查的是Hbase。</p>
+<p>所以可以整合前端，做实时查询的效果，hive那套就没法做实时的。</p>
+<h2 id="Zepplin"><a href="#Zepplin" class="headerlink" title="Zepplin"></a>Zepplin</h2><h3 id="安装启动"><a href="#安装启动" class="headerlink" title="安装启动"></a>安装启动</h3><div class="code-area-wrap"><div class="highlight-tools"><i class="fa fa-angle-down code-expand" aria-hidden="true"></i><div class="code_lang">shell</div><div class="copy-notice"></div><i class="fa fa-clipboard" aria-hidden="true"></i></div><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf /media/psf/centos_share/zeppelin-0.8.0-bin-all.tgz -C ~/apps/</span><br><span class="line"></span><br><span class="line">mv zeppelin-0.8.0-bin-all zeppelin-0.8.0</span><br><span class="line"></span><br><span class="line">./bin/zeppelin-daemon.sh start</span><br><span class="line"></span><br><span class="line">http://mxxcentos7:8080/</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 完成...</span></span><br></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="Zepplin概念"><a href="#Zepplin概念" class="headerlink" title="Zepplin概念"></a>Zepplin概念</h3><p>共享笔记，查出来，自动生成报表，统计图啥的。</p>
+<p>Zepplin能对接很多东西：Kylin、Spark、Hbase、python</p>
+<p>类似于python的jupyter</p>
+<p>就是个可视化报表的BI工具</p>
+<h3 id="配置Zepplin支持Kylin"><a href="#配置Zepplin支持Kylin" class="headerlink" title="配置Zepplin支持Kylin"></a>配置Zepplin支持Kylin</h3><p>1、点击右上角anonymous选择Interpreter</p>
+<p>2、搜索Kylin插件并修改相应的配置  </p>
+<p>3、修改完成点击Save完成</p>
+<p>界面操作：略</p>
+<h3 id="案例实操"><a href="#案例实操" class="headerlink" title="案例实操"></a>案例实操</h3><p>1、点击Notebook创建新的note</p>
+<p>2、填写Note Name点击Create  </p>
+<p>3、执行查询  </p>
+<p>4、结果展示  </p>
+<p>5、其他图表格式</p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Machine</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://machine4869.gitee.io/2019/11/11/20191111151342292/">https://machine4869.gitee.io/2019/11/11/20191111151342292/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://machine4869.gitee.io">哑舍</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/">大数据    </a></div><div class="post_share"><div class="social-share" data-image="/img/default_p7.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.png" alt="微信"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付宝"><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2019/11/15/20191115135655400/"><img class="prev_cover lazyload" data-src="/img/default_p8.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>Hue-Hadoop UI系统</span></div></a></div><div class="next-post pull_right"><a href="/2019/11/11/20191111111820425/"><img class="next_cover lazyload" data-src="/img/default_p11.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>Impala-高性能SQL查询</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2019/12/26/20191226144408846/" title="ELK-搜索引擎"><img class="relatedPosts_cover lazyload"data-src="/img/default_p1.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-12-26</div><div class="relatedPosts_title">ELK-搜索引擎</div></div></a></div><div class="relatedPosts_item"><a href="/2019/12/11/20191211154140441/" title="数据仓库-业务数据仓库"><img class="relatedPosts_cover lazyload"data-src="/img/default_p10.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-12-11</div><div class="relatedPosts_title">数据仓库-业务数据仓库</div></div></a></div><div class="relatedPosts_item"><a href="/2019/12/04/20191204140743901/" title="数据仓库-用户行为数据仓库"><img class="relatedPosts_cover lazyload"data-src="/img/default_p4.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-12-04</div><div class="relatedPosts_title">数据仓库-用户行为数据仓库</div></div></a></div><div class="relatedPosts_item"><a href="/2019/11/21/20191121155413741/" title="数据仓库-用户行为数据采集"><img class="relatedPosts_cover lazyload"data-src="/img/default_p1.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-11-21</div><div class="relatedPosts_title">数据仓库-用户行为数据采集</div></div></a></div><div class="relatedPosts_item"><a href="/2019/11/21/20191121140654751/" title="Ambari-Hadoop Web UI"><img class="relatedPosts_cover lazyload"data-src="/img/default_p7.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-11-21</div><div class="relatedPosts_title">Ambari-Hadoop Web UI</div></div></a></div><div class="relatedPosts_item"><a href="/2019/11/19/20191119151208934/" title="Kettle-ETL工具&数据抽取"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2019-11-19</div><div class="relatedPosts_title">Kettle-ETL工具&数据抽取</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script><script>var notify = true == true ? true : false;
+var verify = false == true ? true : false;
+var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify:notify,
+  verify:verify,
+  appId:'yPVvDIaWlODDhs0bbECwLIIp-gzGzoHsz',
+  appKey:'VyOIa40LxnjURzW1HUCiwTpV',
+  placeholder:'记得留下你的昵称及邮箱，以便收到答复~',
+  avatar:'monsterid',
+  guest_info:guest_info,
+  pageSize:'10',
+  lang:'zh-cn',
+  recordIP: true
+});</script></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2020 By Machine</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://machine4869.gitee.io/">blog</a>!</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">简</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script id="canvas_nest" color="215,215,215" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>

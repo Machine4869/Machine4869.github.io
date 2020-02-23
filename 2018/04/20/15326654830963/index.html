@@ -1,0 +1,399 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>SpringMVC笔记（一） | 哑舍</title><meta name="description" content="SpringMVC笔记（一）"><meta name="keywords" content="Spring"><meta name="author" content="Machine"><meta name="copyright" content="Machine"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/cat2.ico"><link rel="preconnect" href="//cdn.jsdelivr.net"><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin><link rel="preconnect" href="//busuanzi.ibruce.info"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="SpringMVC笔记（一）"><meta name="twitter:description" content="SpringMVC笔记（一）"><meta name="twitter:image" content="https://machine4869.gitee.io/img/default_p7.jpeg"><meta property="og:type" content="article"><meta property="og:title" content="SpringMVC笔记（一）"><meta property="og:url" content="https://machine4869.gitee.io/2018/04/20/15326654830963/"><meta property="og:site_name" content="哑舍"><meta property="og:description" content="SpringMVC笔记（一）"><meta property="og:image" content="https://machine4869.gitee.io/img/default_p7.jpeg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>const autoChangeMode = 'false'
+var t = Cookies.get("theme");
+if (autoChangeMode == '1'){
+const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+const isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+const isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+const hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+if (t === undefined){
+  if (isLightMode) activateLightMode()
+  else if (isDarkMode) activateDarkMode()
+  else if (isNotSpecified || hasNoSupport){
+    console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+    now = new Date();
+    hour = now.getHours();
+    isNight = hour < 6 || hour >= 18
+    isNight ? activateDarkMode() : activateLightMode()
+}
+} else if (t == 'light') activateLightMode()
+else activateDarkMode()
+
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css"><link rel="canonical" href="https://machine4869.gitee.io/2018/04/20/15326654830963/"><link rel="prev" title="Spring笔记（二）" href="https://machine4869.gitee.io/2018/04/20/15326654119854/"><link rel="next" title="Mybatis笔记（三）：逆向工程" href="https://machine4869.gitee.io/2018/04/20/15326651364004/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容:${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://machine4869.gitee.io/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: 'Snackbar.bookmark.title',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: {"bookmark":{"title":"Snackbar.bookmark.title","message_prev":"按","message_next":"键将本页加入书签"},"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#2d3035","position":"bottom-left"},
+  baiduPush: false,
+  isHome: false,
+  isPost: true
+  
+}</script><meta name="generator" content="Hexo 4.2.0"></head><body><header> <div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">哑舍</a></span><span class="toggle-menu pull_right close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></span><span class="pull_right" id="search_button"><a class="site-page social-icon search"><i class="fa fa-search fa-fw"></i><span> 搜索</span></a></span></div></header><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/head.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">134</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">27</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">45</div></a></div></div></div><hr><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 更多</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> 豆瓣电影</span></a></li><li><a class="site-page" href="/photos/"><i class="fa-fw fa fa-picture-o"></i><span> 照片墙</span></a></li></ul></div></div></div><div id="mobile-sidebar-toc"><div class="toc_mobile_headline">目录</div><div class="sidebar-toc__content"><ol class="toc_mobile_items"><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#概述"><span class="toc_mobile_items-number">1.</span> <span class="toc_mobile_items-text">概述</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#Spring-web-mvc-架构"><span class="toc_mobile_items-number">2.</span> <span class="toc_mobile_items-text">Spring web mvc 架构</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#Spring-mvc-架构图"><span class="toc_mobile_items-number">2.1.</span> <span class="toc_mobile_items-text">Spring mvc 架构图</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#架构流程"><span class="toc_mobile_items-number">2.2.</span> <span class="toc_mobile_items-text">架构流程</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#组件说明"><span class="toc_mobile_items-number">2.3.</span> <span class="toc_mobile_items-text">组件说明</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#SpringMVC快速开始"><span class="toc_mobile_items-number">3.</span> <span class="toc_mobile_items-text">SpringMVC快速开始</span></a><ol class="toc_mobile_items-child"><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#开始案例"><span class="toc_mobile_items-number">3.1.</span> <span class="toc_mobile_items-text">开始案例</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-2"><a class="toc_mobile_items-link" href="#小结"><span class="toc_mobile_items-number">3.2.</span> <span class="toc_mobile_items-text">小结</span></a></li></ol></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#注解Mapper和Adapter"><span class="toc_mobile_items-number">4.</span> <span class="toc_mobile_items-text">注解Mapper和Adapter</span></a></li><li class="toc_mobile_items-item toc_mobile_items-level-1"><a class="toc_mobile_items-link" href="#springmvc-处理流程源码分析"><span class="toc_mobile_items-number">5.</span> <span class="toc_mobile_items-text">springmvc 处理流程源码分析</span></a></li></ol></div></div></div><div id="body-wrap"><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true">     </i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#概述"><span class="toc-number">1.</span> <span class="toc-text">概述</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Spring-web-mvc-架构"><span class="toc-number">2.</span> <span class="toc-text">Spring web mvc 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-mvc-架构图"><span class="toc-number">2.1.</span> <span class="toc-text">Spring mvc 架构图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#架构流程"><span class="toc-number">2.2.</span> <span class="toc-text">架构流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#组件说明"><span class="toc-number">2.3.</span> <span class="toc-text">组件说明</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SpringMVC快速开始"><span class="toc-number">3.</span> <span class="toc-text">SpringMVC快速开始</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#开始案例"><span class="toc-number">3.1.</span> <span class="toc-text">开始案例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-number">3.2.</span> <span class="toc-text">小结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#注解Mapper和Adapter"><span class="toc-number">4.</span> <span class="toc-text">注解Mapper和Adapter</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#springmvc-处理流程源码分析"><span class="toc-number">5.</span> <span class="toc-text">springmvc 处理流程源码分析</span></a></li></ol></div></div></div><main id="content-outer"><div id="top-container" style="background-image: url(/img/default_p7.jpeg)"><div id="post-info"><div id="post-title"><div class="posttitle">SpringMVC笔记（一）</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 发表于 2018-04-20<span class="post-meta__separator">|</span><i class="fa fa-history fa-fw" aria-hidden="true"></i> 更新于 2019-11-28</time><span class="post-meta__separator">|</span><span><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Spring/">Spring</a><i class="fa fa-angle-right fa-fw" aria-hidden="true"></i><i class="fa fa-inbox post-meta__icon fa-fw" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/Spring/SpringMVC/">SpringMVC</a></span><div class="post-meta-wordcount"><i class="fa fa-file-word-o post-meta__icon fa-fw" aria-hidden="true"></i><span>字数总计:</span><span class="word-count">2.5k</span><span class="post-meta__separator">|</span><i class="fa fa-clock-o post-meta__icon fa-fw" aria-hidden="true"></i><span>阅读时长: 10 分钟</span><div class="post-meta-pv-cv"><span class="post-meta__separator">|</span><span><i class="fa fa-eye post-meta__icon fa-fw" aria-hidden="true"> </i>阅读量:</span><span id="busuanzi_value_page_pv"></span><span class="post-meta__separator">|</span><i class="fa fa-comments-o post-meta__icon fa-fw" aria-hidden="true"></i><span>评论数:</span><a href="/2018/04/20/15326654830963/#post-comment" itemprop="discussionUrl"><span class="valine-comment-count comment-count" data-xid="/2018/04/20/15326654830963/" itemprop="commentCount"></span></a></div></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><blockquote>
+<p>参考：【itheima】</p>
+</blockquote>
+<p>[toc]</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><pre><code>1. 表现层的框架，是 Spring 框架的一部分,可以从 Spring的整体结构中看得出来
+2. MVC
+    - C 控制器 controller 
+        - 作用：接收请求，响应处理结果，没有业务逻辑
+    - M 模型
+        pojo service dao
+    - V 视图 View 将模型数据展示给用户</code></pre><p>web MVC:<br><a href="/2018/04/20/15326654830963/SpringMVC_01.png" data-fancybox="group" data-caption="SpringMVC_01" class="fancybox"><img alt="SpringMVC_01" title="SpringMVC_01" data-src="/2018/04/20/15326654830963/SpringMVC_01.png" class="lazyload"></a></p>
+<h1 id="Spring-web-mvc-架构"><a href="#Spring-web-mvc-架构" class="headerlink" title="Spring web mvc 架构"></a>Spring web mvc 架构</h1><h2 id="Spring-mvc-架构图"><a href="#Spring-mvc-架构图" class="headerlink" title="Spring mvc 架构图"></a>Spring mvc 架构图</h2><p><a href="/2018/04/20/15326654830963/SpringMVC_02.png" data-fancybox="group" data-caption="SpringMVC_02" class="fancybox"><img alt="SpringMVC_02" title="SpringMVC_02" data-src="/2018/04/20/15326654830963/SpringMVC_02.png" class="lazyload"></a></p>
+<h2 id="架构流程"><a href="#架构流程" class="headerlink" title="架构流程"></a>架构流程</h2><pre><code>1、 用户发送请求至前端控制器DispatcherServlet
+2、 DispatcherServlet收到请求调用HandlerMapping处理器映射器。
+3、 处理器映射器根据**请求url**找到具体的处理器，生成处理器对象及处理器拦截器(如果有
+则生成)一并返回给DispatcherServlet。
+4、 DispatcherServlet通过HandlerAdapter处理器适配器**调用**处理器
+5、 执行处理器(**Controller，也叫后端控制器**)。
+6、 Controller执行完成返回ModelAndView
+7、 HandlerAdapter将controller执行结果ModelAndView返回给DispatcherServlet
+8、 DispatcherServlet将ModelAndView传给ViewReslover视图解析器
+9、 ViewReslover解析后返回具体View
+10、 DispatcherServlet对View进行渲染视图(即将模型数据填充至视图中)。 
+11、 DispatcherServlet响应用户</code></pre><h2 id="组件说明"><a href="#组件说明" class="headerlink" title="组件说明"></a>组件说明</h2><pre><code>-- DispatcherServlet:前端控制器 
+    - 用户请求到达前端控制器，它就相当于mvc模式中的c，dispatcherServlet是整个流程控制 的中心，由它调用其它组件处理用户的请求，dispatcherServlet的存在降低了组件之间的 耦合性。
+
+-- HandlerMapping:处理器映射器 
+    - HandlerMapping负责根据用户请求找到Handler即处理器，springmvc提供了不同的映射器实 现不同的映射方式，例如:配置文件方式，实现接口方式，注解方式等。
+
+-- Handler:处理器
+    -Handler 是继DispatcherServlet前端控制器的后端控制器，在DispatcherServlet的控制下 Handler对具体的用户请求进行处理。
+
+-- HandlAdapter:处理器适配器 
+    - 通过HandlerAdapter对处理器进行执行，这是适配器模式的应用，通过扩展适配器可以对更 多类型的处理器进行执行。
+
+-- View Resolver:视图解析器
+    - View Resolver负责将处理结果生成View视图，View Resolver首先根据逻辑视图名解析成物 理视图名即具体的页面地址，再生成View视图对象，最后对View进行渲染将处理结果通过页 面展示给用户。 springmvc框架提供了很多的View视图类型，包括:jstlView、 freemarkerView、pdfView等。</code></pre><h1 id="SpringMVC快速开始"><a href="#SpringMVC快速开始" class="headerlink" title="SpringMVC快速开始"></a>SpringMVC快速开始</h1><h2 id="开始案例"><a href="#开始案例" class="headerlink" title="开始案例"></a>开始案例</h2><pre><code>-- jar包：
+    spring所有jar包和依赖包
+
+
+-- 配置前端控制器
+    &lt;servlet&gt; 
+        &lt;servlet-name&gt;springmvc&lt;/servlet-name&gt; 
+            &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
+            &lt;init-param&gt;
+                &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt; 
+                &lt;param-value&gt;classpath:springmvc.xml&lt;/param-value&gt;
+            &lt;/init-param&gt;
+            &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;springmvc&lt;/servlet-name&gt; 
+        &lt;url-pattern&gt;*.action&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+    &lt;!--
+        load-on-startup:表示servlet随服务启动; 
+        url-pattern:*.action的请交给DispatcherServlet处理。
+        contextConfigLocation:指定springmvc配置的加载位置，
+            如果不指定则默认加 载WEB-INF/[DispatcherServlet 的Servlet 名字]-servlet.xml。
+    --&gt;
+
+
+-- Servlet 拦截方式
+    1、拦截固定后缀的url，比如设置为 *.do、*.action， 
+        -- 此方法最简单，不会导致静态资源(jpg,js,css)被拦截。
+    2、拦截所有，设置为/
+        -- REST风格的url
+        -- 但是此方法会导致静态文件(jpg,js,css)被拦截后不能正常显示。需要特殊处理
+
+
+-- springmvc 配置文件
+    &lt;!--
+        Springmvc默认加载WEB-INF/[前端控制器的名字]-servlet.xml，也可以在前端控制器定义处指定加载的配置文件
+    --&gt;
+    &lt;init-param&gt; 
+        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt; 
+        &lt;param-value&gt;classpath:springmvc.xml&lt;/param-value&gt; 
+    &lt;/init-param&gt;
+
+
+-- 配置HandlerAdapter
+    springmvc.xml 文件配置如下:
+    &lt;bean class=&quot;org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter&quot;/&gt;   
+    &lt;!--
+        SimpleControllerHandlerAdapter:即简单控制器处理适配器，
+        所有实现了 org.springframework.web.servlet.mvc.Controller 接口的Bean
+        作为 Springmvc的后端控制器。
+    --&gt;
+
+
+-- Handler开发
+
+    public class ItemList1 implements Controller {
+        @Override
+        public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
+            //商品列表
+            List&lt;Items&gt; itemsList = new ArrayList&lt;Items&gt;();
+
+            Items items_1 = new Items(); 
+            items_1.setName(&quot;联想笔记本&quot;); 
+            items_1.setPrice(6000f); 
+            items_1.setDetail(&quot;ThinkPad T430 联想笔记本电脑!&quot;);
+
+            Items items_2 = new Items(); 
+            items_2.setName(&quot;苹果手机&quot;); 
+            items_2.setPrice(5000f);
+            items_2.setDetail(&quot;iphone6苹果手机!&quot;); 
+            itemsList.add(items_1);
+            itemsList.add(items_2);
+
+            //创建modelAndView准备填充数据、设置视图 
+            ModelAndView modelAndView = new ModelAndView();
+            //填充数据
+            modelAndView.addObject(&quot;itemsList&quot;, itemsList); 
+            //视图 ModelAndView:包含了模型数据及逻辑视图名
+            modelAndView.setViewName(&quot;order/itemsList&quot;);
+            return modelAndView; 
+        }
+    }
+
+
+-- 配置文件
+
+    springmvc.xml 文件配置如下:
+
+    &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot; 
+        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        xmlns:mvc=&quot;http://www.springframework.org/schema/mvc&quot;
+        xmlns:context=&quot;http://www.springframework.org/schema/contex t&quot;
+        xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot; 
+        xmlns:tx=&quot;http://www.springframework.org/schema/tx&quot;
+        xsi:schemaLocation=&quot;
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+              http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+              http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+              http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+              http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd&quot;&gt;
+
+            &lt;!-- 处理器映射器--&gt;
+            &lt;!-- 根据bean的name进行查找Handler 将action的url配置在bean的 name中 --&gt;
+            &lt;bean class=&quot;org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping&quot; /&gt;
+
+            &lt;!--
+                BeanNameUrlHandlerMapping:表示将定义的Bean名字作为请求的url，
+                需要将编写的 controller在spring容器中进行配置，且指定bean的name为请求的url，且必须以.action 结尾
+
+            --&gt;
+
+            &lt;!-- controller配置 --&gt;
+            &lt;bean name=&quot;/items1.action&quot; id=&quot;itemList1&quot; class=&quot;cn.itcast.springmvc.controller.first.ItemList1&quot;/&gt;
+
+            &lt;!--
+                前边配置的处理器映射器为BeanNameUrlHandlerMapping， 
+                如果请求的URL 为“上下文/items1.action”将会成功映射到ItemList1控制器。
+            --&gt;
+
+            &lt;!-- 配置视图解析器 --&gt;
+            &lt;!-- ViewResolver --&gt;
+            &lt;bean class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+                &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot;/&gt;
+                &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot;/&gt;
+                &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot;/&gt;
+            &lt;/bean&gt;
+
+            &lt;!--
+                InternalResourceViewResolver: 支持JSP视图解析
+                viewClass:JstlView表示JSP模板页面需要使用JSTL标签库，所以classpath中必须包含jstl 的相关jar 包;
+                prefix 和suffix:查找视图页面的前缀和后缀，最终视图的址为: 前缀+逻辑视图名+后缀
+                    逻辑视图名需要在controller中返回ModelAndView指定
+                    比如逻辑 视图名为hello，则最终返回的jsp视图地址 “WEB-INF/jsp/hello.jsp”
+            --&gt;
+    &lt;/beans&gt;
+
+
+-- 视图开发
+    jsp...
+    部署在tomcat测试</code></pre><h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><pre><code>-- DispatcherServlet：
+    DispatcherServlet 创建时会默认从DispatcherServlet.properties文件加载springmvc所用的各各组件
+
+-- HandlerMapping 处理器映射器
+
+    -- BeanNameUrlHandlerMapping
+        - 根据请求的url与spring容器中定义的bean的name进行 匹配，从而从 spring 容器中找到 bean 实例
+
+        &lt;!—beanName Url映射器 --&gt;
+        &lt;bean class=&quot;org.springframework.web.servlet.handler.BeanNameUrlHandlerMappin g&quot;/&gt;
+
+
+
+    -- SimpleUrlHandlerMapping 
+        -- simpleUrlHandlerMapping 是 BeanNameUrlHandlerMapping 的增强版本，它可以将 url 和 处理器 bean 的 id 进行统一映射配置
+
+        &lt;!—简单url映射 --&gt; 
+        &lt;bean class=&quot;org.springframework.web.servlet.handler.SimpleUrlHandlerMapping&quot;&gt;
+            &lt;property name=&quot;mappings&quot;&gt;
+                &lt;props&gt;
+                    &lt;prop key=&quot;/items1.action&quot;&gt;controller的bean id&lt;/prop&gt; 
+                    &lt;prop key=&quot;/items2.action&quot;&gt;controller的bean id&lt;/prop&gt;
+                    &lt;/props&gt;
+               &lt;/property&gt;
+        &lt;/bean&gt;       
+
+
+-- HandlerAdapter 处理器适配器
+
+    -- HandlerAdapter 会根据适配器接口对后端控制器进行包装(适配)
+
+    1. SimpleControllerHandlerAdapter
+            SimpleControllerHandlerAdapter简单控制器处理器适配器，
+            所有实现了 org.springframework.web.servlet.mvc.Controller 接口的Bean通过此适配器进行适配、 执行。
+
+            配置如下:
+             &lt;bean class=&quot;org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter&quot; /&gt;
+
+    2. HttpRequestHandlerAdapter
+
+        -- HttpRequestHandlerAdapter，http请求处理器适配器，
+            所有实现了 org.springframework.web.HttpRequestHandler 接口的Bean通过此适配器进行适配、执行
+
+        -- 适配器配置如下:
+        &lt;bean class=&quot;org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter&quot;/&gt;
+
+        -- Controller实现如下:
+
+        public class ItemList2 implements HttpRequestHandler {
+            @Override
+            public void handleRequest(HttpServletRequest request, HttpServletResponse response) 
+                throws ServletException,IOException {
+
+                //...
+
+                // 填充数据
+                request.setAttribute(&quot;itemsList&quot;, itemsList);
+                // 视图 
+                request.getRequestDispatcher(&quot;/WEB-INF/jsp/order/itemsList.jsp&quot;).forward(request, response);
+            } 
+
+            /*
+                从上边可以看出此适配器器的handleRequest方法没有返回ModelAndView，
+                可通过 response修改定义响应内容，比如返回json数据:
+                response.setCharacterEncoding(&quot;utf-8&quot;); 
+                response.setContentType(&quot;application/json;charset=utf-8&quot;); 
+                response.getWriter().write(&quot;json串&quot;);
+            */            
+        }             </code></pre><h1 id="注解Mapper和Adapter"><a href="#注解Mapper和Adapter" class="headerlink" title="注解Mapper和Adapter"></a>注解Mapper和Adapter</h1><pre><code>-- Controller 的代码:
+
+    @Controller
+    public class ItemList3 {    //普通java类，没有继承
+        @RequestMapping(&quot;/queryItem.action&quot;)
+        public ModelAndView queryItem() {
+
+            //... 
+
+            // 创建modelAndView准备填充数据、设置视图 
+            ModelAndView modelAndView = new ModelAndView();
+            // 填充数据
+            modelAndView.addObject(&quot;itemsList&quot;, itemsList); 
+            // 视图 
+            modelAndView.setViewName(&quot;order/itemsList&quot;);
+            return modelAndView;
+        }
+
+
+-- 组件扫描器
+    -- 扫描标记@controller 的控制器类，不用配置bean了
+
+     &lt;!-- 扫描controller注解,多个包中间使用半角逗号分隔 --&gt; 
+     &lt;context:component-scan base-package=&quot;cn.itcast.springmvc.controller.first&quot;/&gt;   
+
+
+-- RequestMappingHandlerMapping
+
+        -- 注解式处理器映射器，对类中标记@ResquestMapping的方法进行映射
+            根据 ResquestMapping 定义的 url 匹配 ResquestMapping 标记的方法，
+            匹配成功返回 HandlerMethod 对象给前端控制器，
+
+        -- 推荐使用 RequestMappingHandlerMapping 完成注解式处理器映射
+
+        -- 配置如下:
+
+        &lt;!--注解映射器 --&gt;
+        &lt;bean class=&quot;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&quot;/&gt;
+        &lt;!--
+            @RequestMapping:定义请求 url 到处理器功能方法的映射
+        --&gt;
+
+
+-- RequestMappingHandlerAdapter
+
+        -- 注解式处理器适配器，对标记@ResquestMapping 的方法进行适配。
+        -- 推荐使用RequestMappingHandlerAdapter 完成注解式处理器适配。
+        -- 配置如下:
+
+        &lt;!--注解适配器 --&gt;
+         &lt;bean class=&quot;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter&quot;/&gt;
+
+
+--  &lt;mvc:annotation-driven&gt;
+
+        -- springmvc 使用 &lt;mvc:annotation-driven&gt; 自动加载
+            RequestMappingHandlerMapping 和 RequestMappingHandlerAdapter ， 
+        -- 可用在 springmvc.xml 配置文件中使用 
+            &lt;mvc:annotation-driven&gt; 替代注解处理器和适配器的配置。</code></pre><h1 id="springmvc-处理流程源码分析"><a href="#springmvc-处理流程源码分析" class="headerlink" title="springmvc 处理流程源码分析"></a>springmvc 处理流程源码分析</h1><pre><code>1. 用户发送请求到 DispatherServlet 前端控制器
+2. DispatherServlet 调用 HandlerMapping(处理器映射器)根据 url 查找 Handler
+3. DispatherServlet 调用 HandlerAdapter(处理器适配器)对 HandlerMapping 找到 Handler 进行包装、执行。HandlerAdapter 执行 Handler 完成后，返回了一个 ModleAndView(springmvc 封装对象)
+4. DispatherServlet 拿着 ModelAndView 调用 ViewResolver(视图解析器)进行视图解 析，解析完成后返回一个 View(很多不同视图类型的 View)
+5. DispatcherServlet 进行视图渲染，将 Model 中数据放到 request 域，在页面展示</code></pre></div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Machine</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://machine4869.gitee.io/2018/04/20/15326654830963/">https://machine4869.gitee.io/2018/04/20/15326654830963/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://machine4869.gitee.io">哑舍</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Spring/">Spring    </a></div><div class="post_share"><div class="social-share" data-image="/img/default_p7.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/wechat.png" alt="微信"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lazyload post-qr-code__img" src="/img/alipay.jpg" alt="支付宝"><div class="post-qr-code__desc">支付宝</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2018/04/20/15326654119854/"><img class="prev_cover lazyload" data-src="/img/default_p9.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>Spring笔记（二）</span></div></a></div><div class="next-post pull_right"><a href="/2018/04/20/15326651364004/"><img class="next_cover lazyload" data-src="/img/default_p12.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>Mybatis笔记（三）：逆向工程</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2018/05/18/15326725480153/" title="SpringBoot学习笔记"><img class="relatedPosts_cover lazyload"data-src="/img/default_p5.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-05-18</div><div class="relatedPosts_title">SpringBoot学习笔记</div></div></a></div><div class="relatedPosts_item"><a href="/2018/04/20/15326651794162/" title="Spring笔记（一）"><img class="relatedPosts_cover lazyload"data-src="/img/default_p8.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-04-20</div><div class="relatedPosts_title">Spring笔记（一）</div></div></a></div><div class="relatedPosts_item"><a href="/2018/04/20/15326656335063/" title="SpringMVC笔记（二）"><img class="relatedPosts_cover lazyload"data-src="/img/default_p4.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-04-20</div><div class="relatedPosts_title">SpringMVC笔记（二）</div></div></a></div><div class="relatedPosts_item"><a href="/2018/04/20/15326654119854/" title="Spring笔记（二）"><img class="relatedPosts_cover lazyload"data-src="/img/default_p9.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-04-20</div><div class="relatedPosts_title">Spring笔记（二）</div></div></a></div><div class="relatedPosts_item"><a href="/2018/04/20/15326659380385/" title="Spring-RequestParam加与不加的区别"><img class="relatedPosts_cover lazyload"data-src="/img/default_p7.jpeg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2018-04-20</div><div class="relatedPosts_title">Spring-RequestParam加与不加的区别</div></div></a></div></div><div class="clear_both"></div></div><hr><div id="post-comment"><div class="comment_headling"><i class="fa fa-comments fa-fw" aria-hidden="true"></i><span> 评论</span></div><div class="vcomment" id="vcomment"></div><script src="https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js"></script><script>var notify = true == true ? true : false;
+var verify = false == true ? true : false;
+var GUEST_INFO = ['nick','mail','link'];
+var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+  return GUEST_INFO.indexOf(item) > -1
+});
+guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+
+window.valine = new Valine({
+  el:'#vcomment',
+  notify:notify,
+  verify:verify,
+  appId:'yPVvDIaWlODDhs0bbECwLIIp-gzGzoHsz',
+  appKey:'VyOIa40LxnjURzW1HUCiwTpV',
+  placeholder:'记得留下你的昵称及邮箱，以便收到答复~',
+  avatar:'monsterid',
+  guest_info:guest_info,
+  pageSize:'10',
+  lang:'zh-cn',
+  recordIP: true
+});</script></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2020 By Machine</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div><div class="footer_custom_text">Hi, welcome to my <a href="https://machine4869.gitee.io/">blog</a>!</div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">简</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><a id="to_comment" href="#post-comment" title="直达评论"><i class="scroll_to_comment fa fa-comments">  </i></a><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script id="canvas_nest" color="215,215,215" opacity="0.7" zIndex="-1" count="99" mobile="false" src="https://cdn.jsdelivr.net/gh/jerryc127/butterfly_cdn@2.1.0/js/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@latest/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/lazysizes@latest/lazysizes.min.js" async=""></script><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章"></div></div></div><hr><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a href="https://github.com/wzpan/hexo-generator-search" target="_blank" rel="noopener" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fa fa-times"></i></span></div><div class="search-mask"></div></body></html>
